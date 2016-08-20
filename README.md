@@ -1,3 +1,4 @@
+MIT License
 Copyright (c) [2016] [epikosrest@gmail.com]
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -75,6 +76,6 @@ https://trello.com/b/7Bw9gke5/epikos-rest-service
 https://epikosrest.slack.com/messages/epikosservice/
 
 
-This service is free and can be used by anyone to enhance and use for any purpose and hence being released under GNU GPL V2
+This service is free and can be used by anyone to enhance and use for any purpose and hence being released under MIT License
 Feedback are welcome: please send it to epikosrest@gmail.com
 
