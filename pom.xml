@@ -28,8 +28,8 @@ SOFTWARE.>
 	<version>0.0.1</version>
 	<name>Epikos</name>
     <description>Epikos is a Rest Serivce framework which can be extend to develop any other Rest API/Services. For more
-    detail please checkout github (git@github.com:nitinaryal/Epikos.git)</description>
-    <url>https://github.com/nitinaryal/Epikos</url>
+    detail please checkout github (https://github.com/epikosrest/epikos.git)</description>
+    <url>https://github.com/epikosrest</url>
 
 	<licenses>
 		<license>
@@ -38,19 +38,10 @@ SOFTWARE.>
 		</license>
 	</licenses>
 
-    <developers>
-        <developer>
-            <name>Nitin Raj Aryal</name>
-            <email>nitinrajaryal@gmail.com</email>
-            <organization>nepaliapps</organization>
-            <organizationUrl>http://www.nepaliapps.com</organizationUrl>
-        </developer>
-    </developers>
-
     <scm>
-        <connection>scm:git:git@github.com:nitinaryal/Epikos.git</connection>
-        <developerConnection>scm:git:git@github.com:nitinaryal/Epikos.git</developerConnection>
-        <url>https://github.com/nitinaryal/Epikos.git</url>
+        <connection>scm:git:git@github.com:epikosrest/epikos.git</connection>
+        <developerConnection>scm:git:git@github.com:epikosrest/epikos.git</developerConnection>
+        <url>https://github.com/epikosrest/epikos.git</url>
     </scm>
 
     <distributionManagement>
@@ -340,4 +331,13 @@ SOFTWARE.>
         <swagger.version>1.3.12</swagger.version>
 		<junit.version>4.12</junit.version>
 	</properties>
+
+    <developers>
+        <developer>
+            <name>Nitin Raj Aryal</name>
+            <email>nitinrajaryal@gmail.com</email>
+            <organization>nepaliapps.com</organization>
+            <organizationUrl>http://www.nepaliapps.com</organizationUrl>
+        </developer>
+    </developers>
 </project>
