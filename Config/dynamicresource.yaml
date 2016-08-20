@@ -1,0 +1,42 @@
+#Dynamic Resource Configuration. The following hierarchy represents list of dynamic resources that represents rest resources
+#E.g the resources can be define as follow
+#apiList:
+#   - consume: application/json
+#     produce: text/html
+#     path: test/{testid}/hello
+#     method: GET
+#     responseSpoof: test response data
+#   - consume: application/json
+#     produce: application/json
+#     path: hello
+#     method: GET
+#     response: restresources.HelloResponse
+#     controller: controller.example.HelloController
+#   - consume: application/json
+#     produce: application/json
+#     path: hello
+#     method: POST
+#     request: restresources.Hello
+#     response: restresources.HelloResponse
+#     controller: controller.example.HelloController
+#   - consume: application/json
+#     produce: application/xml
+#     path: info/{infoid}/test
+#     method: GET
+#     request: restresources.Information
+#     response: restresources.InformationResponse
+#     controller: controller.example.InformationController
+#   - consume: application/json
+#     produce: application/json
+#     path: info/{infoid}/test
+#     method: POST
+#     request: restresources.Information
+#     response: restresources.InformationResponse
+#     controller: controller.example.InformationController
+#   - consume: application/json
+#     produce: application/json
+#     path: info/{infoid}/tests
+#     method: POST
+#     response: spoof/test_response.json
+
+
