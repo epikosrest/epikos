@@ -22,6 +22,8 @@ SOFTWARE.
 package core.lib.configuration;
 
 import core.lib.Utility;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -34,6 +36,8 @@ import java.util.Properties;
 
 public class ConfigMonitor extends Thread {
 
+	final static Logger logger = LoggerFactory.getLogger(ConfigMonitor.class);
+
 	File appConfigFile;
 	Properties properties = null;
 	static List<IConfiguration> configConsumerList = new ArrayList<IConfiguration>();
@@ -45,8 +49,8 @@ public class ConfigMonitor extends Thread {
 	
 	@Override
 	public void run(){
-		
-		System.out.println(String.format("[%s] Config file ", Utility.getTimeStamp(Calendar.getInstance().getTimeInMillis())) + appConfigFile.getName()
+
+		logger.info(String.format("[%s] Config file ", Utility.getTimeStamp(Calendar.getInstance().getTimeInMillis())) + appConfigFile.getName()
 				+ " was last modified on "
 				+ Utility.getTimeStamp(appConfigFile.lastModified()));
 		long appConfigFileLastModifiedTime = appConfigFile
@@ -60,8 +64,7 @@ public class ConfigMonitor extends Thread {
 				if (appConfigFileLastModifiedTime != appConfigFile
 						.lastModified()) {
 					// update the time stamp
-					System.out
-							.println(String.format("[%s] Updating Config file ",Utility.getTimeStamp(Calendar.getInstance().getTimeInMillis()))
+					logger.info(String.format("[%s] Updating Config file ",Utility.getTimeStamp(Calendar.getInstance().getTimeInMillis()))
 									+ appConfigFile.getName()
 									+ " recent modified time detected which is on "
 									+ Utility.getTimeStamp(appConfigFile
@@ -79,17 +82,16 @@ public class ConfigMonitor extends Thread {
 					
 
 				} else {
-					System.out
-							.println(String.format("[%s] Config file ",Utility.getTimeStamp(Calendar.getInstance().getTimeInMillis()))
+					logger.info(String.format("[%s] Config file ",Utility.getTimeStamp(Calendar.getInstance().getTimeInMillis()))
 									+ appConfigFile.getName()
 									+ " has not been modified since last time "
 									+ Utility.getTimeStamp(appConfigFile
 											.lastModified()));
 				}
 			} catch (InterruptedException interupExp) {
-				System.out.println("Interrupt exception occured !");
+				logger.info("Interrupt exception occured !");
 			} catch (IOException ioExp) {
-				System.out.println("IOException occured !" + ioExp.getMessage());
+				logger.info("IOException occured !" + ioExp.getMessage());
 				
 			}
 		}

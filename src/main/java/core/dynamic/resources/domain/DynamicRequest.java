@@ -1,4 +1,4 @@
-package core.dynamicrestresources;
+package core.dynamic.resources.domain;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 

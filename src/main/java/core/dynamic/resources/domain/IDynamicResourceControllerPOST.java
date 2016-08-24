@@ -1,4 +1,4 @@
-package core.dynamicrestresources;
+package core.dynamic.resources.domain;
 
 /**
  * Created by nitina on 5/18/16.

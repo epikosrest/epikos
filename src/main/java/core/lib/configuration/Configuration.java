@@ -22,12 +22,16 @@ SOFTWARE.
 package core.lib.configuration;
 
 import core.lib.Utility;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
 public class Configuration implements IConfiguration {
+
+	final static Logger logger = LoggerFactory.getLogger(Configuration.class);
 
 	IAppConfiguration applicationConfiguration = null;
 	List<IConfigConsumer> configConsumerList = null;
@@ -51,7 +55,7 @@ public class Configuration implements IConfiguration {
 
 	@Override
 	public void notifyConfigChange() {
-		System.out.println("Current property list");
+		logger.info("Current property list");
 		Utility.loadConfigurationKeyValue(getProperties());
 		System.out
 				.println("Got notification about config change from AppConfiguratoin");

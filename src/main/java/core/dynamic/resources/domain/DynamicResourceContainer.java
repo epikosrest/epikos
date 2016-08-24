@@ -1,4 +1,4 @@
-package core.dynamicrestresources.domain;
+package core.dynamic.resources.domain;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,17 +8,17 @@ import java.util.List;
  */
 public class DynamicResourceContainer {
 
-    List<DynamicResourceMetaData> apiList;
+    List<Api> apiList;
 
     public DynamicResourceContainer(){
         apiList = new ArrayList<>();
     }
 
-    public List<DynamicResourceMetaData> getApiList() {
+    public List<Api> getApiList() {
         return apiList;
     }
 
-    public void setApiList(List<DynamicResourceMetaData> apiList) {
+    public void setApiList(List<Api> apiList) {
         this.apiList = apiList;
     }
 }

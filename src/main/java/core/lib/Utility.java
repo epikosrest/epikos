@@ -22,6 +22,9 @@ SOFTWARE.
 
 package core.lib;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Iterator;
@@ -29,6 +32,9 @@ import java.util.Properties;
 import java.util.TreeSet;
 
 public final class Utility {
+
+	final static Logger logger = LoggerFactory.getLogger(Utility.class);
+
 
 	final static String CONFIGURATION_FILE = "config.file.name";
 	final static String CONFIGURATION_FOLDER = "confg.file.location";
@@ -53,7 +59,7 @@ public final class Utility {
 			stringBuilder.append("     " + key + "=" + value + "\n");
 
 		}
-		System.out.println(stringBuilder);
+		logger.info(stringBuilder.toString());
 	}
 
 	public static String getConfigFileFullPath() {
@@ -79,7 +85,7 @@ public final class Utility {
 		}
 		configFileNameAndFolderPath.append("\nConfig folder name : "
 				+ configFolder);
-		System.out.println(configFileNameAndFolderPath.toString());
+        logger.info(configFileNameAndFolderPath.toString());
 		return configFolder + fileSeparator + configFileName;
 	}
 
