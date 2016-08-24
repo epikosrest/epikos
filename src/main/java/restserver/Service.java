@@ -23,6 +23,7 @@ SOFTWARE.
 
 package restserver;
 
+import core.lib.Utility;
 import core.service.IServiceMetaData;
 import core.service.ServiceMetaData;
 import core.service.ServiceResourceConfig;
@@ -31,13 +32,20 @@ import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.grizzly.http.server.NetworkListener;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
+import java.io.*;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Scanner;
 
 public class Service implements IService{
 
 	protected HttpServer grizzlyServer = null;
+
+	final static Logger logger = LoggerFactory.getLogger(Service.class);
 
 	public static void main(String[] args) throws Exception {
 
@@ -48,6 +56,7 @@ public class Service implements IService{
 
 	private final void run() throws Exception {
 
+        spitBannerText();
         Configuration config = loadConfigurationProperties();
         IServiceMetaData metaData = loadMetaData(config);
         ServiceResourceConfig resource = new ServiceResourceConfig(metaData);
@@ -59,7 +68,7 @@ public class Service implements IService{
 	@Override
 	public final void start() throws Exception{
 		run();
-		System.out.println("Press Enter to stop");
+        logger.info("Press Enter to stop");
 		System.in.read();
 		stop();
 
@@ -68,23 +77,23 @@ public class Service implements IService{
 	@Override
 	public final void stop() throws Exception{
 		if (grizzlyServer == null) {
-			System.out.println("Service already stopped !");
+            logger.info("Service already stopped !");
 			return;
 		}
 
 		HttpServer tempGrizzlyServer = grizzlyServer;
 		grizzlyServer = null;
 		tempGrizzlyServer.shutdown();
-		System.out.println("Server stopped");
+        logger.info("Server stopped");
 	}
 
 	private Configuration loadConfigurationProperties() {
         Configuration configuration = new Configuration();
 
 		if (configuration.getProperties() == null) {
-			System.out.println(configuration.getErrorMessage());
+            logger.info(configuration.getErrorMessage());
 		}
-		System.out.println("Number of properites : " + configuration.getProperties().size());
+        logger.info("Number of properites : " + configuration.getProperties().size());
         return configuration;
 	}
 
@@ -103,14 +112,32 @@ public class Service implements IService{
     }
 
     private void printServiceStatus(String serviceName,String serviceURI){
-        System.out.println("\n\n*************************************************************************************************");
-        System.out.println(String.format("***** Jersey app started with WADL available at "
+        logger.info("\n\n*************************************************************************************************");
+        logger.info(String.format("***** Jersey app started with WADL available at "
                 + "%sapplication.wadl *****\n***** Hit enter to stop it... *****", serviceURI));
         String serverAddressLine = serviceName + " is up and running";
-        System.out.println("***** "+serverAddressLine +
+        logger.info("***** "+serverAddressLine +
 				" *****\n***** " + serviceURI + " *****" +
 				" *****\n***** " + serviceURI + "docs" + " *****" + " for api documentation");
-        System.out.println("*************************************************************************************************\n\n");
+        logger.info("*************************************************************************************************\n\n");
+    }
+
+	private void spitBannerText(){
+        String bannerText="";
+		logger.info("Loading .....");
+		try {
+
+
+            String resourceBannerFullPath = System.getProperty("user.dir") + System.getProperty("file.separator") +
+                    "src" + System.getProperty("file.separator") +
+                    "main" + System.getProperty("file.separator") +
+            "resources"+ System.getProperty("file.separator") +"banner.txt";
+            bannerText = new String(Files.readAllBytes(Paths.get(resourceBannerFullPath)));
+            logger.info("\n" + bannerText + "\n");
+
+            }catch (Exception exp){
+			//We don't care if it failed !
+		}
     }
 
 }

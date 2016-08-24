@@ -1,4 +1,4 @@
-package core.dynamicrestresources.etc;
+package core.dynamic.resources.domain;
 
 import org.glassfish.jersey.server.model.Resource;
 

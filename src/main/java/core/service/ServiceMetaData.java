@@ -23,10 +23,14 @@ SOFTWARE.
 package core.service;
 
 import core.lib.configuration.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.InetAddress;
 
 final public class ServiceMetaData implements  IServiceMetaData{
+
+    final static Logger logger = LoggerFactory.getLogger(ServiceMetaData.class);
 
     final String uriPath = "/";
     String hostName;
@@ -109,15 +113,15 @@ final public class ServiceMetaData implements  IServiceMetaData{
         serviceURI = "http://" + hostName + ":" + portNumber + uriPath;
         dynamicResourceConfigLocation = config.getProperties().getProperty("dynamic.resource.configuration");
 
-        System.out.println("\n#####################################################################################\n");
-        System.out.println("##### Service name : " + serviceName + " #####");
-        System.out.println("##### Service URI : " + serviceURI + " #####");
-        System.out.println("##### Resources being read/fetched from package(s)\n");
+        logger.info("\n#####################################################################################\n");
+        logger.info("##### Service name : " + serviceName + " #####");
+        logger.info("##### Service URI : " + serviceURI + " #####");
+        logger.info("##### Resources being read/fetched from package(s)\n");
         for (String resourcePkgName:resourcePackageName) {
-            System.out.print(resourcePkgName + "\t");
+            logger.info(resourcePkgName + "\t");
         }
-        System.out.println("\n##### Dynamic Resource Configuration file name : '" + dynamicResourceConfigLocation+ "' #####");
-        System.out.println("\n#####################################################################################\n");
+        logger.info("\n##### Dynamic Resource Configuration file name : '" + dynamicResourceConfigLocation+ "' #####");
+        logger.info("\n#####################################################################################\n");
 
     }
 }

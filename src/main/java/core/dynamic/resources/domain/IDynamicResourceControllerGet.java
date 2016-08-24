@@ -1,6 +1,4 @@
-package core.dynamicrestresources;
-
-import javax.ws.rs.core.MultivaluedMap;
+package core.dynamic.resources.domain;
 
 /**
  * Created by nitina on 5/15/16.

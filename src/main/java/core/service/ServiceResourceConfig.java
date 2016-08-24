@@ -28,13 +28,8 @@ import com.fasterxml.jackson.databind.MappingJsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wordnik.swagger.jaxrs.config.BeanConfig;
 import core.domain.enums.Method;
-import core.dynamicrestresources.DynamicRequest;
-import core.dynamicrestresources.IDynamicResourceController;
-import core.dynamicrestresources.IDynamicResourceControllerGet;
-import core.dynamicrestresources.IDynamicResourceControllerPOST;
-import core.dynamicrestresources.domain.DynamicResourceContainer;
-import core.dynamicrestresources.domain.DynamicResourceMetaData;
-import core.dynamicrestresources.etc.ResourceDocumentBuilder;
+import core.domain.enums.ServiceMode;
+import core.dynamic.resources.domain.*;
 import core.error.EpikosError;
 import core.filter.PostRequestFilter;
 import core.filter.PreRequestFilter;
@@ -50,7 +45,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 import restserver.Service;
-import scala.util.parsing.json.JSONObject;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.ws.rs.container.ContainerRequestContext;
@@ -73,13 +67,13 @@ import java.util.Map;
 public  class ServiceResourceConfig extends ResourceConfig {
 
     IServiceMetaData metaData;
-    Logger logger = LoggerFactory.getLogger(ServiceResourceConfig.class);
+    final static Logger logger = LoggerFactory.getLogger(ServiceResourceConfig.class);
 
     public ServiceResourceConfig(IServiceMetaData metaData) throws Exception{
         this.metaData = metaData;
 
-        List<DynamicResourceMetaData> dynamicResourceMetaDataList = loadDynamicResource(metaData.getDynamicResourceConfigLocation());
-        buildAndRegisterDynamicResource(dynamicResourceMetaDataList, metaData.getServiceURI());
+        List<Api> ApiList = loadDynamicResource(metaData.getDynamicResourceConfigLocation());
+        buildAndRegisterDynamicResource(ApiList, metaData.getServiceURI());
 
         register(com.wordnik.swagger.jersey.listing.ApiListingResourceJSON.class);
         register(com.wordnik.swagger.jersey.listing.JerseyApiDeclarationProvider.class);
@@ -123,10 +117,10 @@ public  class ServiceResourceConfig extends ResourceConfig {
         beanConfig.setResourcePackage(Service.class.getPackage().getName());
         beanConfig.setBasePath(metaData.getServiceURI());
         beanConfig.setDescription("Resources");
-        beanConfig.setTitle("APIs");
+        beanConfig.setTitle("Apis");
     }
 
-    private Resource scanAndBuildResources(final DynamicResourceMetaData drmetaData){
+    private Resource scanAndBuildResources(final Api drmetaData){
         final Resource.Builder resourceBuilder = Resource.builder();
         resourceBuilder.path(drmetaData.getPath());
 
@@ -170,7 +164,7 @@ public  class ServiceResourceConfig extends ResourceConfig {
                             } else {
                                 //ToDo: add logic to construct processing request without controller. In this case either response or request and response must be provided
 
-                                //ToDo: currently responseSpoof property is only being used by API builder resource to display API doc
+                                //ToDo: currently responseSpoof property is only being used by Api builder resource to display Api doc
                                 //Need to identify good way to handle this  and get rid of responseData property !
                                 try {
                                     if (metricsRecorder != null)
@@ -183,7 +177,7 @@ public  class ServiceResourceConfig extends ResourceConfig {
                             }
 
                         } catch(Exception exp){
-                            System.out.println("Exception " + exp.getMessage());
+                            logger.info("Exception " + exp.getMessage());
                             EpikosError epikosError = new EpikosError();
                             epikosError.setError("Exception " + exp.getMessage() + "Exception occured while processing request. Report it to application developer!");
                             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(epikosError).type(drmetaData.getProduce()).build();
@@ -202,7 +196,7 @@ public  class ServiceResourceConfig extends ResourceConfig {
     * Load dynamic resource from config file. Note the config file can be anyfile defined in Application.properties file
     * as value of key dynamic.resource.configuration
      */
-    private List<DynamicResourceMetaData> loadDynamicResource(String dynamicResourceFileName){
+    private List<Api> loadDynamicResource(String dynamicResourceFileName){
 
         //Load dynamic resource information from file specified as value of key dynamic.resource.configuration defined in Application.Configuraiton
         DynamicResourceContainer dynamicResource = loadDynamicResourceFromYaml(dynamicResourceFileName);
@@ -225,7 +219,7 @@ public  class ServiceResourceConfig extends ResourceConfig {
         try( InputStream in = Files.newInputStream( Paths.get(yamlFileFullPath) ) ) {
             config = yaml.loadAs( in, DynamicResourceContainer.class );
             if(config == null){
-                logger.warn("Yaml configuration file can not loaded properly. Please check the configuration has api list");
+                logger.warn("Yaml configuration file can not loaded properly. Please check the configuration has Api list");
             }
         }catch (IOException ioExp){
             logger.error(ioExp.getMessage());
@@ -233,17 +227,17 @@ public  class ServiceResourceConfig extends ResourceConfig {
         return config;
     }
 
-    private void buildAndRegisterDynamicResource(List<DynamicResourceMetaData> dynamicResourceMetaDataList,String serviceURI) {
+    private void buildAndRegisterDynamicResource(List<Api> ApiList,String serviceURI) {
         ResourceDocumentBuilder resourceDocumentBuilder = new ResourceDocumentBuilder();
         Resource resource = null;
         List<Resource> validResourceList = new ArrayList<>();
 
-        if(dynamicResourceMetaDataList != null) {
-            for (DynamicResourceMetaData dynamicResourceMetaData : dynamicResourceMetaDataList) {
+        if(ApiList != null) {
+            for (Api Api : ApiList) {
 
-                resource = scanAndBuildResources(dynamicResourceMetaData);
+                resource = scanAndBuildResources(Api);
 
-                if (validateDynamicResource(dynamicResourceMetaData, resourceDocumentBuilder)) {
+                if (validateDynamicResource(Api, resourceDocumentBuilder)) {
 
                     validResourceList.add(resource);
                     registerResources(resource);
@@ -254,45 +248,45 @@ public  class ServiceResourceConfig extends ResourceConfig {
 
         resourceDocumentBuilder.addResourceValidInformation(validResourceList,serviceURI);
 
-        resource = buildAndRegisterAPIDocument(resourceDocumentBuilder);
+        resource = buildAndRegisterApiDocument(resourceDocumentBuilder);
     }
 
 
     /***
      * Validate dynamic resource meta data before creating resource out of it. The basic validation like type of request class,
      * response class and controller class will be done.
-     * @param dynamicResourceMetaData
+     * @param Api
      * @param resouceDocumentBuilder
      */
-    private boolean validateDynamicResource(DynamicResourceMetaData dynamicResourceMetaData ,ResourceDocumentBuilder resouceDocumentBuilder){
+    private boolean validateDynamicResource(Api Api ,ResourceDocumentBuilder resouceDocumentBuilder){
 
-        if(isExceptionalCase(dynamicResourceMetaData)){
+        if(isExceptionalCase(Api)){
             return true;
         }
 
         //Othewise validate if any one of component (request,response and controller) present and is valid
-        boolean resourceFound = (resourceClassExist(dynamicResourceMetaData.getController(),
+        boolean resourceFound = (resourceClassExist(Api.getController(),
                 IDynamicResourceController.class.getTypeName()+";"+
                         IDynamicResourceControllerGet.class.getTypeName() + ";" +
                         IDynamicResourceControllerPOST.class.getTypeName()
                 ,resouceDocumentBuilder));
         if(!resourceFound){
-            buildInvalidInformation(dynamicResourceMetaData,resouceDocumentBuilder);
+            buildInvalidInformation(Api,resouceDocumentBuilder);
             resourceFound = false;
         }
-        if(dynamicResourceMetaData.getRequest() != null && !resourceClassExist(dynamicResourceMetaData.getRequest()
+        if(Api.getRequest() != null && !resourceClassExist(Api.getRequest()
                 ,"NA",resouceDocumentBuilder)){
-            if(!isResourceASONObject(dynamicResourceMetaData.getRequest(),null)) {
+            if(!isResourceASONObject(Api.getRequest(),null)) {
 
-                buildInvalidInformation(dynamicResourceMetaData, resouceDocumentBuilder);
+                buildInvalidInformation(Api, resouceDocumentBuilder);
                 resourceFound = false;
             }
         }
 
-        if(dynamicResourceMetaData.getResponse() != null && !resourceClassExist(dynamicResourceMetaData.getResponse()
+        if(Api.getResponse() != null && !resourceClassExist(Api.getResponse()
                 ,"NA",resouceDocumentBuilder)){
-            if(!isResourceASONObject(dynamicResourceMetaData.getResponse(),null)) {
-                buildInvalidInformation(dynamicResourceMetaData, resouceDocumentBuilder);
+            if(!isResourceASONObject(Api.getResponse(),null)) {
+                buildInvalidInformation(Api, resouceDocumentBuilder);
                 resourceFound = false;
             }
         }
@@ -300,23 +294,23 @@ public  class ServiceResourceConfig extends ResourceConfig {
         return resourceFound;
     }
 
-    //This is to validate whether the API signature qualify for exceptional case or not
+    //This is to validate whether the Api signature qualify for exceptional case or not
     //For example if all three i.e. controller, request and response class are not provided and is empty then we don't care and
     //just register resource as is
     //If controller is not provided but request and response is then we will continue by registering resource as is where for
     //any request coming to the endpoint will be have response as provided
-    private boolean isExceptionalCase(DynamicResourceMetaData dynamicResourceMetaData){
-        if(dynamicResourceMetaData.getController() == null &&
-                dynamicResourceMetaData.getRequest() == null &&
-                dynamicResourceMetaData.getResponse() == null){
+    private boolean isExceptionalCase(Api Api){
+        if(Api.getController() == null &&
+                Api.getRequest() == null &&
+                Api.getResponse() == null){
             return true;
         //This is to support Spoof mode or Spoof functionality
-        }else if(dynamicResourceMetaData.getController() == null &&
-                dynamicResourceMetaData.getResponse() != null
+        }else if(Api.getController() == null &&
+                Api.getResponse() != null
                 ){
             //Will only support JSON
             //ToDo add support for any other format like XML etc
-            if(isResourceASONObject(dynamicResourceMetaData.getResponse(),dynamicResourceMetaData)) {
+            if(isResourceASONObject(Api.getResponse(),Api)) {
                 return true;
             }
 
@@ -324,18 +318,18 @@ public  class ServiceResourceConfig extends ResourceConfig {
         return false;
     }
 
-    private void buildInvalidInformation(DynamicResourceMetaData dynamicResourceMetaData ,ResourceDocumentBuilder resouceDocumentBuilder){
+    private void buildInvalidInformation(Api Api ,ResourceDocumentBuilder resouceDocumentBuilder){
 
         resouceDocumentBuilder.addResourceInvalidInformation(String.format("Failed to create resource %s , supported verb: %s , consumed media type %s, produce media type %s",
-                dynamicResourceMetaData.getPath(),
-                dynamicResourceMetaData.getMethod(),
-                dynamicResourceMetaData.getConsume(),
-                dynamicResourceMetaData.getProduce()));
+                Api.getPath(),
+                Api.getMethod(),
+                Api.getConsume(),
+                Api.getProduce()));
     }
 
     private boolean resourceClassExist(String className, String resourceType, ResourceDocumentBuilder resouceDocumentBuilder){
         Class classToVerify = null;
-        System.out.println("Looking for interface " + resourceType);
+        logger.info("Looking for interface " + resourceType);
         try{
             if(className == null || className.length()==0){
                 resouceDocumentBuilder.updateResourceInvalidInformation(String.format("Resource class name %s is either empty or not defined !",className));
@@ -350,7 +344,7 @@ public  class ServiceResourceConfig extends ResourceConfig {
             }
             //Check if the resource class has implemented correct interface i.e. IDynamicController/Get/POST
             for (Class interfaceImp : interfaceImplemented) {
-                System.out.println("Interface : " + interfaceImp.getName());
+                logger.info("Interface : " + interfaceImp.getName());
 
                 if (resourceType.contains(interfaceImp.getName())) {
                     return true;
@@ -367,7 +361,7 @@ public  class ServiceResourceConfig extends ResourceConfig {
         }
     }
 
-    private boolean isResourceASONObject(String resourceData,DynamicResourceMetaData dynamicResourceMetaData){
+    private boolean isResourceASONObject(String resourceData,Api api){
         try {
             final String fileSeparator = System.getProperty("file.separator");
             final String baseDir = System.getProperty("user.dir");
@@ -376,10 +370,10 @@ public  class ServiceResourceConfig extends ResourceConfig {
         JsonFactory jfactory = new MappingJsonFactory();
             JsonParser jParser = jfactory.createJsonParser(new File(spoofFilePath));
             String value = readFile(spoofFilePath);
-            if(dynamicResourceMetaData != null){
-                dynamicResourceMetaData.setResponseSpoof(value);
+            if(api != null){
+                api.setResponseSpoof(value);
+                api.setServiceMode(ServiceMode.SPOOF);
             }
-            //mapper.readTree(resourceData);
             return true;
         }catch (IOException ioExp){
             return false;
@@ -405,11 +399,11 @@ public  class ServiceResourceConfig extends ResourceConfig {
     }
 
     /***
-     * Build API Document
+     * Build Api Document
      * @param resourceDocumentBuilder
      */
-    private Resource buildAndRegisterAPIDocument(ResourceDocumentBuilder resourceDocumentBuilder){
-        DynamicResourceMetaData apiDocumentResource = new DynamicResourceMetaData();
+    private Resource buildAndRegisterApiDocument(ResourceDocumentBuilder resourceDocumentBuilder){
+        Api apiDocumentResource = new Api();
         apiDocumentResource.setConsume("application/json");
         apiDocumentResource.setProduce("text/html");
         apiDocumentResource.setPath("docs");
@@ -418,7 +412,7 @@ public  class ServiceResourceConfig extends ResourceConfig {
         if(StringUtils.isEmpty(apiDocInfo) || apiDocInfo.equals(ResourceDocumentBuilder.docHeader + ResourceDocumentBuilder.docFooter)){
             StringBuilder sb = new StringBuilder();
             sb.append(apiDocInfo.replace(ResourceDocumentBuilder.docFooter,""));
-            sb.append("<tr><td colspan=\"4\">There are no APi Listed in configuration file. Please refer to dynamic.resource.configuration section of Application.configuration file for more detail</tr></td>");
+            sb.append("<tr><td colspan=\"4\">There are no Api Listed in configuration file. Please refer to dynamic.resource.configuration section of Application.configuration file for more detail</tr></td>");
             sb.append(ResourceDocumentBuilder.docFooter);
             apiDocumentResource.setResponse(sb.toString());
         }else {
