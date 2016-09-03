@@ -60,6 +60,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
 
 /**
  * Created by nitina on 5/4/16.
@@ -169,6 +171,9 @@ public  class ServiceResourceConfig extends ResourceConfig {
                                 try {
                                     if (metricsRecorder != null)
                                         metricsRecorder.startTimerContext();
+                                    if(drmetaData.getServiceMode() == ServiceMode.SPOOF){
+                                        return Response.ok().entity(drmetaData.getResponseSpoof()).type(drmetaData.getProduce()).build();
+                                    }
                                     return Response.ok().entity(drmetaData.getResponse()).type(drmetaData.getProduce()).build();
                                 } finally {
                                     if (metricsRecorder != null)

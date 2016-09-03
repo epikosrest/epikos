@@ -1,11 +1,11 @@
 #Dynamic Resource Configuration. The following hierarchy represents list of dynamic resources that represents rest resources
 #E.g the resources can be define as follow
-#apiList:
-#   - consume: application/json
-#     produce: text/html
-#     path: test/{testid}/hello
-#     method: GET
-#     responseSpoof: test response data
+apiList:
+   - consume: application/json
+     produce: text/html
+     path: test/{testid}/hello
+     method: GET
+     response: spoof/test_response.json
 #   - consume: application/json
 #     produce: application/json
 #     path: hello

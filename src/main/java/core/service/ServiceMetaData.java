@@ -40,6 +40,9 @@ final public class ServiceMetaData implements  IServiceMetaData{
     String serviceURI;
     String dynamicResourceConfigLocation;
 
+    final String DEFAULT_PORT_NUMBER = "8080";
+    final String DEFAULT_SERVICE_NAME = "epikos";
+
     public ServiceMetaData(Configuration config) throws Exception{
         setMetaData(config);
     }
@@ -102,14 +105,15 @@ final public class ServiceMetaData implements  IServiceMetaData{
     }
 
     void setMetaData(Configuration config) throws Exception{
-        if(config == null){
+        if(config == null || config.getProperties()==null){
             throw new RuntimeException("Configuration must not be null. Please check the configuration file is present and properly configured");
         }
         String portNumber = config.getProperties().getProperty("port");
         hostName = InetAddress.getLocalHost().getHostName();
-        portNumber = portNumber==null?"8085":portNumber;
-        serviceName = config.getProperties().getProperty("service.name");
-        resourcePackageName = config.getProperties().getProperty("resource.package.name").split(";");
+        portNumber = portNumber==null?DEFAULT_PORT_NUMBER:portNumber;
+        serviceName = config.getProperties().getProperty("service.name") == null ?DEFAULT_SERVICE_NAME:config.getProperties().getProperty("service.name");
+        resourcePackageName = config.getProperties().getProperty("resource.package.name") == null?
+                                null:config.getProperties().getProperty("resource.package.name").split(";");
         serviceURI = "http://" + hostName + ":" + portNumber + uriPath;
         dynamicResourceConfigLocation = config.getProperties().getProperty("dynamic.resource.configuration");
 
