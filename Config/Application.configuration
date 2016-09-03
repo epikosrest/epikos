@@ -5,7 +5,7 @@ service.name=EpikosRestService
 port=8080
 
 #Multiple resources can be included using ; delimeter. This value indicates where to look for rest resources
-resource.package.name=restresources;testpackage
+#resource.package.name=restresources;testpackage
 
 #indicates yaml file to use to find dynamic resources i.e. api list
 dynamic.resource.configuration=dynamicresource.yaml

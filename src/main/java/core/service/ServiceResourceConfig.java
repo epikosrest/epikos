@@ -113,8 +113,10 @@ public  class ServiceResourceConfig extends ResourceConfig {
         BeanConfig beanConfig = new BeanConfig();
         beanConfig.setVersion("1.0");
         beanConfig.setScan(true);
-        for (String resourcePackage: metaData.getResourcePackageName()) {
-            beanConfig.setResourcePackage(resourcePackage);
+        if(metaData.getResourcePackageName() != null) {
+            for (String resourcePackage : metaData.getResourcePackageName()) {
+                beanConfig.setResourcePackage(resourcePackage);
+            }
         }
         beanConfig.setResourcePackage(Service.class.getPackage().getName());
         beanConfig.setBasePath(metaData.getServiceURI());
