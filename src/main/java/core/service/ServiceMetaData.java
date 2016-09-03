@@ -121,8 +121,10 @@ final public class ServiceMetaData implements  IServiceMetaData{
         logger.info("##### Service name : " + serviceName + " #####");
         logger.info("##### Service URI : " + serviceURI + " #####");
         logger.info("##### Resources being read/fetched from package(s)\n");
-        for (String resourcePkgName:resourcePackageName) {
-            logger.info(resourcePkgName + "\t");
+        if(resourcePackageName != null) {
+            for (String resourcePkgName : resourcePackageName) {
+                logger.info(resourcePkgName + "\t");
+            }
         }
         logger.info("\n##### Dynamic Resource Configuration file name : '" + dynamicResourceConfigLocation+ "' #####");
         logger.info("\n#####################################################################################\n");
