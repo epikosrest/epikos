@@ -156,10 +156,12 @@ public  class ServiceResourceConfig extends ResourceConfig {
 
                                     return processPOSTReqeust(controller,metricsRecorder,containerRequestContext,
                                             drmetaData.getProduce());
+
                                 }else if (containerRequestContext.getRequest().getMethod().equals(Method.PUT)){
                                     throw new NotImplementedException();
-
                                 }else if (containerRequestContext.getRequest().getMethod().equals(Method.DELETE)){
+                                    throw new NotImplementedException();
+                                }else if (containerRequestContext.getRequest().getMethod().equals(Method.PATCH)){
                                     throw new NotImplementedException();
                                 }else{
                                     throw new Exception("Panic: Unknown method");
