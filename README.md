@@ -24,7 +24,10 @@ About :
 This is "open" source project written in Java based on Jersey (for rest framework), Grizzly (embedded http container)
 and is based on Maven (Gradle will be supported in future) for build system.
 
-Motivatoin: 
+Motivation:
+This Project is puerly for education, sharing knowledge and ideas  and try  new concept in REST API design and implementation.
+This is ongoing and evolving project which will not necessarily provide complete solution instead will be evolving and
+adding new feature and ideas.
 The motivation is to learn and implement dynamic feature provided by Jersey to make rest api design simple and effective. 
 Based on Jersey, the framework try to exploit dynamic feature such as "Programmatic API for Building Resources " 
 ref: https://jersey.java.net/documentation/latest/resource-builder.html .
@@ -33,15 +36,16 @@ Intention:
 The idea of the framework is very simple. It simply try to separate API def/doc from code base and allow adding resource
 dynamically rather than static. The framework will have all common essential feature at top level there by allowing
 developer to focus on business logic rather than basic plumbing e.g. Coding to start service , adding metrics , defining
-rest api in controller/resource handler etc. All these common task should/must be provided at top level framework so that
-developers can focus on business logic implementation. Please refer to wiki for more detail.
+rest api in controller/resource handler etc. Based on goal and concept of the project, all these common task should/must be 
+provided at top level framework there by allowing
+developers to focus on business logic implementation. Please refer to wiki for more detail.
 
 In nutshell the idea/intention of this project is to create a base rest service/framework which will
 
 1. allow to stand up a restful service using configuration (see below for more detail) and minimum coding.
 
 2. allow it to extend/inherit and use it as base framework to spin off
-new RESTful services with reach features that include but not limited to logging, metrics/performance monitoring, api documentation.
+new RESTful services with rich features that include but not limited to logging, metrics/performance monitoring, api documentation.
 
 Requirement:
 Java version 1.8 or above
@@ -53,7 +57,7 @@ How To :
 
 1. To clone the service 
 $ git clone https://github.com/epikosrest/epikos.git
-2. Compile the serivce 
+2. Compile the service 
 $ mvn clean install
 
 3. run service : $ sh target/bin/Service
