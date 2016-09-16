@@ -42,25 +42,7 @@ public final class Utility {
 	static String configFileName;
 	static String configFolder;
 
-	public static void loadConfigurationKeyValue(Properties properties) {
-		StringBuilder stringBuilder = new StringBuilder(
-				"Loaded Configuration Values:\n");
-		Iterator<Object> iter = new TreeSet<Object>(properties.keySet())
-				.iterator();
-		while (iter.hasNext()) {
-			String key = (String) iter.next();
-			String value = properties.getProperty(key);
 
-			// Mask sensetive data like "username" and "password"
-			if (key.toLowerCase().contains("user")
-					|| key.toLowerCase().contains("password"))
-				value = "**********";
-
-			stringBuilder.append("     " + key + "=" + value + "\n");
-
-		}
-		logger.info(stringBuilder.toString());
-	}
 
 	public static String getConfigFileFullPath() {
 		final String fileSeparator = System.getProperty("file.separator");

@@ -25,9 +25,7 @@ import java.io.IOException;
 import java.util.Properties;
 
 public interface IAppConfiguration {
-	void loadConfiguration() throws IOException;
+	//void loadConfiguration() throws IOException;
 	Properties getProperties();
 	public String getErrorMessage();
-	public String getConfigFileName();
-	public String getConfigFolder();
 }

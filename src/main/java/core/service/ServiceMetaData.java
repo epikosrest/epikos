@@ -114,7 +114,7 @@ final public class ServiceMetaData implements  IServiceMetaData{
         serviceName = config.getProperties().getProperty("service.name") == null ?DEFAULT_SERVICE_NAME:config.getProperties().getProperty("service.name");
         resourcePackageName = config.getProperties().getProperty("resource.package.name") == null?
                                 null:config.getProperties().getProperty("resource.package.name").split(";");
-        serviceURI = "http://" + hostName + ":" + portNumber + uriPath;
+        serviceURI = "http://" + hostName + ":" + portNumber +uriPath+ serviceName+ uriPath;
         dynamicResourceConfigLocation = config.getProperties().getProperty("dynamic.resource.configuration");
 
         logger.info("\n#####################################################################################\n");
