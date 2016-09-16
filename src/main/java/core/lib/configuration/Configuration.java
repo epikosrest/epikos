@@ -29,16 +29,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-public class Configuration implements IConfiguration {
+public class Configuration {
 
 	final static Logger logger = LoggerFactory.getLogger(Configuration.class);
 
 	IAppConfiguration applicationConfiguration = null;
-	List<IConfigConsumer> configConsumerList = null;
+
 
 	public Configuration() {
-		applicationConfiguration = AppConfiguration.getConfiguration(this);
-		configConsumerList = new ArrayList<IConfigConsumer>();
+		applicationConfiguration = AppConfiguration.getAppConfiguration;
 	}
 
 	public IAppConfiguration getApplicationConfiguration() {
@@ -51,26 +50,6 @@ public class Configuration implements IConfiguration {
 
 	public String getErrorMessage() {
 		return applicationConfiguration.getErrorMessage();
-	}
-
-	@Override
-	public void notifyConfigChange() {
-		logger.info("Current property list");
-		Utility.loadConfigurationKeyValue(getProperties());
-		System.out
-				.println("Got notification about config change from AppConfiguratoin");
-		for (IConfigConsumer consumer : configConsumerList) {
-			consumer.notifyConsumer(getProperties());
-		}
-	}
-
-	@Override
-	public void addConfigConsumer(IConfigConsumer consumer) {
-
-		if (configConsumerList == null) {
-			configConsumerList = new ArrayList<IConfigConsumer>();
-		}
-		configConsumerList.add(consumer);
 	}
 
 }
