@@ -44,6 +44,7 @@ import org.glassfish.jersey.server.model.ResourceMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.parser.ParserException;
 import restserver.Service;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
@@ -74,8 +75,18 @@ public  class ServiceResourceConfig extends ResourceConfig {
     public ServiceResourceConfig(IServiceMetaData metaData) throws Exception{
         this.metaData = metaData;
 
-        List<Api> ApiList = loadDynamicResource(metaData.getDynamicResourceConfigLocation());
-        buildAndRegisterDynamicResource(ApiList, metaData.getServiceURI());
+        List<Api> apiList = new ArrayList<>();
+        try {
+
+            apiList = loadDynamicResource(metaData.getDynamicResourceConfigLocation());
+            buildAndRegisterDynamicResource(apiList, metaData.getServiceURI());
+
+        }catch (IOException ioExp){
+            buildAndRegisterInvalidDocInfo("The dynamic resource api list file is not available. Please check the value dynamic.resource.configuration in Application.configuration file and make sure the file exist !\n" + ioExp.getMessage());
+
+        }catch (ParserException parserExp){
+            buildAndRegisterInvalidDocInfo("The dynamic resource api list is an invalid yaml file. Please check the api list and fix following issue \n" + parserExp.getMessage());
+        }
 
         register(com.wordnik.swagger.jersey.listing.ApiListingResourceJSON.class);
         register(com.wordnik.swagger.jersey.listing.JerseyApiDeclarationProvider.class);
@@ -205,10 +216,14 @@ public  class ServiceResourceConfig extends ResourceConfig {
     * Load dynamic resource from config file. Note the config file can be anyfile defined in Application.properties file
     * as value of key dynamic.resource.configuration
      */
-    private List<Api> loadDynamicResource(String dynamicResourceFileName){
+    private List<Api> loadDynamicResource(String dynamicResourceFileName) throws IOException,ParserException{
 
         //Load dynamic resource information from file specified as value of key dynamic.resource.configuration defined in Application.Configuraiton
-        DynamicResourceContainer dynamicResource = loadDynamicResourceFromYaml(dynamicResourceFileName);
+        DynamicResourceContainer dynamicResource = new DynamicResourceContainer();
+
+        dynamicResource = loadDynamicResourceFromYaml(dynamicResourceFileName);
+
+
         if(dynamicResource == null){
             return null;
         }
@@ -216,7 +231,7 @@ public  class ServiceResourceConfig extends ResourceConfig {
 
     }
 
-    private DynamicResourceContainer loadDynamicResourceFromYaml(String fileName){
+    private DynamicResourceContainer loadDynamicResourceFromYaml(String fileName) throws IOException,ParserException{
 
         Yaml yaml = new Yaml();
         DynamicResourceContainer config = null;
@@ -227,37 +242,44 @@ public  class ServiceResourceConfig extends ResourceConfig {
 
         try( InputStream in = Files.newInputStream( Paths.get(yamlFileFullPath) ) ) {
             config = yaml.loadAs( in, DynamicResourceContainer.class );
-            if(config == null){
-                logger.warn("Yaml configuration file can not loaded properly. Please check the configuration has Api list");
-            }
+
         }catch (IOException ioExp){
             logger.error(ioExp.getMessage());
+            throw ioExp;
+        }catch (ParserException parserExp){
+
+            logger.error("Error reading dynamic resource file : " + parserExp.getMessage());
+            throw parserExp;
+
         }
+
         return config;
     }
 
-    private void buildAndRegisterDynamicResource(List<Api> ApiList,String serviceURI) {
+    private void buildAndRegisterDynamicResource(List<Api> apiList,String serviceURI) {
         ResourceDocumentBuilder resourceDocumentBuilder = new ResourceDocumentBuilder();
-        Resource resource = null;
         List<Resource> validResourceList = new ArrayList<>();
-
-        if(ApiList != null) {
-            for (Api Api : ApiList) {
-
+        if(apiList != null) {
+            Resource resource = null;
+            for (Api Api : apiList) {
                 resource = scanAndBuildResources(Api);
-
                 if (validateDynamicResource(Api, resourceDocumentBuilder)) {
-
                     validResourceList.add(resource);
                     registerResources(resource);
                 }
-
             }
+            resourceDocumentBuilder.addResourceValidInformation(validResourceList,serviceURI);
         }
 
-        resourceDocumentBuilder.addResourceValidInformation(validResourceList,serviceURI);
 
-        resource = buildAndRegisterApiDocument(resourceDocumentBuilder);
+        buildAndRegisterApiDocument(resourceDocumentBuilder);
+    }
+
+    //This function is to add info/error if dynamic resource file is not present or is not a valid yaml file
+    private void buildAndRegisterInvalidDocInfo(String invalidInfo){
+        ResourceDocumentBuilder resourceDocumentBuilder = new ResourceDocumentBuilder();
+        resourceDocumentBuilder.addResourceDocInvalidInfo(invalidInfo);
+        buildAndRegisterApiDocument(resourceDocumentBuilder);
     }
 
 
@@ -411,7 +433,7 @@ public  class ServiceResourceConfig extends ResourceConfig {
      * Build Api Document
      * @param resourceDocumentBuilder
      */
-    private Resource buildAndRegisterApiDocument(ResourceDocumentBuilder resourceDocumentBuilder){
+    private void buildAndRegisterApiDocument(ResourceDocumentBuilder resourceDocumentBuilder){
         Api apiDocumentResource = new Api();
         apiDocumentResource.setConsume("application/json");
         apiDocumentResource.setProduce("text/html");
@@ -430,7 +452,6 @@ public  class ServiceResourceConfig extends ResourceConfig {
 
         Resource resource = scanAndBuildResources(apiDocumentResource);
         registerResources(resource);
-        return resource;
     }
 
     public static ContextResolver<MoxyJsonConfig> createMoxyJsonResolver() {
