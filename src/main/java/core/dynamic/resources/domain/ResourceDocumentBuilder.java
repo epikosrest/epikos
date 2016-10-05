@@ -32,9 +32,6 @@ public class ResourceDocumentBuilder {
             addResourceValidInformation(resource,serviceURI);
         }
 
-        if(resourceInvalidApiDocument != null && resourceInvalidApiDocument.length()!=0){
-            resourceDocument.append(resourceInvalidApiDocument.toString());
-        }
 
         resourceDocument.append(docFooter);
 
@@ -63,6 +60,17 @@ public class ResourceDocumentBuilder {
         resourceInvalidApiDocument.append("</br><tr><td colspan=\"4\" bgcolor=\"#0A5F07\">");
         resourceInvalidApiDocument.append("<b>" + invalidInfo + "</b>");
         resourceInvalidApiDocument.append("</td></tr>");
+    }
+
+    public void addResourceDocInvalidInfo(String invalidInfo){
+        resourceDocument.append(docHeader);
+
+        resourceDocument.append("<tr><td colspan=\"4\" bgcolor=\"#0A5F07\">");
+        resourceDocument.append(invalidInfo);
+        resourceDocument.append("</td></tr>");
+
+        resourceDocument.append(docFooter);
+
     }
 
     public String getResourceDocument() {

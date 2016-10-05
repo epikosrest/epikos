@@ -109,6 +109,7 @@ public class Service implements IService{
 		grizzlyServer.addListener(listener);
         grizzlyServer.getServerConfiguration().setJmxEnabled(true);
         grizzlyServer.start();
+
     }
 
     private void printServiceStatus(String serviceName,String serviceURI){
