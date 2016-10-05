@@ -2,6 +2,7 @@ package core.dynamic.resources.domain;
 
 
 import core.domain.enums.ServiceMode;
+import core.domain.enums.Status;
 import lombok.Data;
 
 /**
@@ -16,6 +17,7 @@ public class Api {
     String request;
     String response;
     String controller;
+    String status;
     String responseSpoof;
     ServiceMode serviceMode;
 }

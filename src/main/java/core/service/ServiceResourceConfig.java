@@ -26,9 +26,11 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.MappingJsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import com.wordnik.swagger.jaxrs.config.BeanConfig;
 import core.domain.enums.Method;
 import core.domain.enums.ServiceMode;
+import core.domain.enums.Status;
 import core.dynamic.resources.domain.*;
 import core.error.EpikosError;
 import core.filter.PostRequestFilter;
@@ -48,9 +50,11 @@ import org.yaml.snakeyaml.parser.ParserException;
 import restserver.Service;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ContextResolver;
@@ -159,20 +163,26 @@ public  class ServiceResourceConfig extends ResourceConfig {
                             //Check request,response and controller configuration exist and hook it appropriately
                             if (controller != null) {
 
-                                if (containerRequestContext.getRequest().getMethod().equals(Method.GET)) {
+                                if (containerRequestContext.getRequest().getMethod().equals(Method.GET.getMethodName())) {
 
                                     return processGETRequest(controller,metricsRecorder,containerRequestContext,drmetaData.getProduce());
 
-                                } else if (containerRequestContext.getRequest().getMethod().equals(Method.POST)){
+                                } else if (containerRequestContext.getRequest().getMethod().equals(Method.POST.getMethodName())){
 
-                                    return processPOSTReqeust(controller,metricsRecorder,containerRequestContext,
-                                            drmetaData.getProduce());
+                                    return processPOSTRequest(controller,metricsRecorder,containerRequestContext,
+                                            drmetaData.getProduce(),drmetaData.getStatus());
 
-                                }else if (containerRequestContext.getRequest().getMethod().equals(Method.PUT)){
-                                    throw new NotImplementedException();
-                                }else if (containerRequestContext.getRequest().getMethod().equals(Method.DELETE)){
-                                    throw new NotImplementedException();
-                                }else if (containerRequestContext.getRequest().getMethod().equals(Method.PATCH)){
+                                }else if (containerRequestContext.getRequest().getMethod().equals(Method.PUT.getMethodName())){
+
+                                    return processPUTRequest(controller,metricsRecorder,containerRequestContext,
+                                            drmetaData.getProduce(),drmetaData.getStatus());
+
+                                }else if (containerRequestContext.getRequest().getMethod().equals(Method.DELETE.getMethodName())){
+
+                                    return processDELETERequest(controller,metricsRecorder,containerRequestContext,
+                                            drmetaData.getProduce(),drmetaData.getStatus());
+
+                                }else if (containerRequestContext.getRequest().getMethod().equals(Method.PATCH.getMethodName())){
                                     throw new NotImplementedException();
                                 }else{
                                     throw new Exception("Panic: Unknown method");
@@ -198,10 +208,10 @@ public  class ServiceResourceConfig extends ResourceConfig {
 
                         } catch(Exception exp){
                             logger.info("Exception " + exp.getMessage());
-                            EpikosError epikosError = new EpikosError();
-                            epikosError.setError("Exception " + exp.getMessage() + "Exception occured while processing request. Report it to application developer!");
-                            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(epikosError).type(drmetaData.getProduce()).build();
-
+                            EpikosError error = new EpikosError();
+                            error.setMessage(exp.getMessage());
+                            error.setId(Status.INTERNALSERVERERROR.getStatus());
+                            return Response.status(error.getId()).entity(error).type(drmetaData.getProduce()).build();
                         }
 
                     }
@@ -261,9 +271,10 @@ public  class ServiceResourceConfig extends ResourceConfig {
         List<Resource> validResourceList = new ArrayList<>();
         if(apiList != null) {
             Resource resource = null;
-            for (Api Api : apiList) {
-                resource = scanAndBuildResources(Api);
-                if (validateDynamicResource(Api, resourceDocumentBuilder)) {
+            for (Api api : apiList) {
+
+                if (validateDynamicResource(api, resourceDocumentBuilder)) {
+                    resource = scanAndBuildResources(api);
                     validResourceList.add(resource);
                     registerResources(resource);
                 }
@@ -286,43 +297,63 @@ public  class ServiceResourceConfig extends ResourceConfig {
     /***
      * Validate dynamic resource meta data before creating resource out of it. The basic validation like type of request class,
      * response class and controller class will be done.
-     * @param Api
-     * @param resouceDocumentBuilder
+     * @param api
+     * @param resourceDocumentBuilder
      */
-    private boolean validateDynamicResource(Api Api ,ResourceDocumentBuilder resouceDocumentBuilder){
+    private boolean validateDynamicResource(Api api ,ResourceDocumentBuilder resourceDocumentBuilder){
 
-        if(isExceptionalCase(Api)){
+        if(isExceptionalCase(api)){
             return true;
         }
 
         //Othewise validate if any one of component (request,response and controller) present and is valid
-        boolean resourceFound = (resourceClassExist(Api.getController(),
+        boolean resourceFound = (resourceClassExist(api.getController(),
                 IDynamicResourceController.class.getTypeName()+";"+
                         IDynamicResourceControllerGet.class.getTypeName() + ";" +
                         IDynamicResourceControllerPOST.class.getTypeName()
-                ,resouceDocumentBuilder));
+                ,resourceDocumentBuilder));
         if(!resourceFound){
-            buildInvalidInformation(Api,resouceDocumentBuilder);
+            buildInvalidInformation(api,resourceDocumentBuilder);
             resourceFound = false;
         }
-        if(Api.getRequest() != null && !resourceClassExist(Api.getRequest()
-                ,"NA",resouceDocumentBuilder)){
-            if(!isResourceASONObject(Api.getRequest(),null)) {
+        if(api.getRequest() != null && !resourceClassExist(api.getRequest()
+                ,"NA",resourceDocumentBuilder)){
+            if(!isResourceASONObject(api.getRequest(),null)) {
 
-                buildInvalidInformation(Api, resouceDocumentBuilder);
+                buildInvalidInformation(api, resourceDocumentBuilder);
                 resourceFound = false;
             }
         }
 
-        if(Api.getResponse() != null && !resourceClassExist(Api.getResponse()
-                ,"NA",resouceDocumentBuilder)){
-            if(!isResourceASONObject(Api.getResponse(),null)) {
-                buildInvalidInformation(Api, resouceDocumentBuilder);
+        if(api.getResponse() != null && !resourceClassExist(api.getResponse()
+                ,"NA",resourceDocumentBuilder)){
+            if(!isResourceASONObject(api.getResponse(),null)) {
+                buildInvalidInformation(api, resourceDocumentBuilder);
                 resourceFound = false;
             }
+        }
+
+        if(StringUtils.isEmpty(api.getStatus()) || StringUtils.isBlank(api.getStatus()) || !isValidStatusCode(api.getStatus())){
+
+            buildInvalidInformation(api, resourceDocumentBuilder);
+            resourceFound = false;
         }
 
         return resourceFound;
+    }
+
+    private boolean isValidStatusCode(String status){
+        Integer statusCode = Status.getStatusCode(status);
+        if(statusCode == null){
+            try {
+                Status statusToVerify = Status.valueOf(status);
+            }catch (Exception exp){
+                logger.error(exp.getMessage());
+                return false;
+            }
+
+        }
+        return true;
     }
 
     //This is to validate whether the Api signature qualify for exceptional case or not
@@ -349,13 +380,14 @@ public  class ServiceResourceConfig extends ResourceConfig {
         return false;
     }
 
-    private void buildInvalidInformation(Api Api ,ResourceDocumentBuilder resouceDocumentBuilder){
+    private void buildInvalidInformation(Api api ,ResourceDocumentBuilder resouceDocumentBuilder){
 
-        resouceDocumentBuilder.addResourceInvalidInformation(String.format("Failed to create resource %s , supported verb: %s , consumed media type %s, produce media type %s",
-                Api.getPath(),
-                Api.getMethod(),
-                Api.getConsume(),
-                Api.getProduce()));
+        resouceDocumentBuilder.addResourceInvalidInformation(String.format("Failed to create resource %s , supported verb: %s , consumed media type %s, produce media type %s , status code %s",
+                api.getPath(),
+                api.getMethod(),
+                api.getConsume(),
+                api.getProduce(),
+                api.getStatus()));
     }
 
     private boolean resourceClassExist(String className, String resourceType, ResourceDocumentBuilder resouceDocumentBuilder){
@@ -474,16 +506,28 @@ public  class ServiceResourceConfig extends ResourceConfig {
 
             final DynamicRequest dynamicRequest = new DynamicRequest(containerRequestContext,pathParams);
             metricsRecorder.startTimerContext();
-            return Response.ok().entity(cont.process(dynamicRequest)).type(mediaTypeToProduce).build();
+            Object response = cont.process(dynamicRequest);
+            if(response instanceof Response){
+                Response respToReturn = (Response)response;
+                if(!mediaTypeToProduce.toLowerCase().equals(respToReturn.getMediaType().toString().toLowerCase())){
+                   logger.warn(String.format("Panic : media type to produce is missmatching ! Expected to produce %s but returned %s",mediaTypeToProduce,respToReturn.getMediaType()));
+                }
+
+                //respToReturn.getStatusInfo()
+                return respToReturn;
+            }
+
+            return Response.ok().entity(response).type(mediaTypeToProduce).build();
+
         } finally {
             metricsRecorder.stopTimerContext();
         }
     }
 
-    private Response processPOSTReqeust(final Class controller,
+    private Response processPOSTRequest(final Class controller,
                                         final metrics.Metrics metricsRecorder,
                                         final ContainerRequestContext containerRequestContext,
-                                        String mediaTypeToProduce) throws Exception{
+                                        String mediaTypeToProduce,String status) throws Exception{
         final IDynamicResourceControllerPOST cont = (IDynamicResourceControllerPOST) controller.newInstance();
         final MultivaluedMap<String, String> pathParams = containerRequestContext.getUriInfo().getPathParameters();
 
@@ -492,11 +536,183 @@ public  class ServiceResourceConfig extends ResourceConfig {
             final DynamicRequest dynamicRequest = new DynamicRequest(containerRequestContext,pathParams);
             metricsRecorder.startTimerContext();
 
-            return Response.ok().entity(cont.process(dynamicRequest)).type(mediaTypeToProduce).build();
+            Integer statusCode = getStatusCode(status);
 
-        } finally {
+            List<Status> supportedStatus = getSupportedStatusListForPOSTMethod();
+            verifyStatusIsSupportedForTheMethod(supportedStatus,statusCode);
+
+            if(status.equals(Status.NOCONTENT)){
+                return Response.status(statusCode).type(mediaTypeToProduce).build();
+            }else if(status.equals(Status.CREATED)){
+                return Response.status(statusCode).entity(cont.process(dynamicRequest)).type(mediaTypeToProduce).location(containerRequestContext.getUriInfo().getAbsolutePath()).build();
+            }
+
+            return Response.status(statusCode).type(mediaTypeToProduce).build();
+
+        }catch (Exception exp){
+            return constructErrorResponse(exp,mediaTypeToProduce);
+        }
+        finally {
             metricsRecorder.stopTimerContext();
         }
     }
+
+    /*
+    The function process PUT request.
+    Param status in this method determines what kind of response to return.
+    As per RFC ref https://tools.ietf.org/html/rfc2616#section-9.6 It only supports NOCONTENT, CREATED and OK
+    If any other status is listed then it will return OK. In case of error BAD REQUEST and INTERNAL SERVICE ERROR
+    with appropriate error message will return
+     */
+    private Response processPUTRequest(final Class controller,
+                                       final metrics.Metrics metricsRecorder,
+                                       final ContainerRequestContext containerRequestContext,
+                                       String mediaTypeToProduce, String status) throws IllegalAccessException, InstantiationException{
+        final IDynamicResourceControllerPUT cont = (IDynamicResourceControllerPUT) controller.newInstance();
+        final MultivaluedMap<String, String> pathParams = containerRequestContext.getUriInfo().getPathParameters();
+
+        try {
+
+            final DynamicRequest dynamicRequest = new DynamicRequest(containerRequestContext,pathParams);
+            metricsRecorder.startTimerContext();
+
+            Integer statusCode = getStatusCode(status);
+
+            List<Status> supportedStatus = getSupportedStatusListForPUTMethod();
+            verifyStatusIsSupportedForTheMethod(supportedStatus,statusCode);
+
+            if(status.equals(Status.NOCONTENT)){
+                return Response.status(statusCode).type(mediaTypeToProduce).build();
+            }else if(status.equals(Status.CREATED)){
+                return Response.status(statusCode).entity(cont.process(dynamicRequest)).type(mediaTypeToProduce).build();
+            }
+
+            return Response.status(statusCode).type(mediaTypeToProduce).build();
+
+        }catch (Exception exp) {
+
+            return constructErrorResponse(exp,mediaTypeToProduce);
+
+        }finally
+        {
+            metricsRecorder.stopTimerContext();
+        }
+    }
+
+    /*
+    The function process DELETE request.
+    Param status in this method determines what kind of response to return.
+    As per RFC ref https://tools.ietf.org/html/rfc2616#section-9.6 It only supports NOCONTENT, ACCEPTED and OK
+    If any other status is listed then it will return OK. In case of error BAD REQUEST and INTERNAL SERVICE ERROR
+    with appropriate error message will return
+     */
+    private Response processDELETERequest(final Class controller,
+                                       final metrics.Metrics metricsRecorder,
+                                       final ContainerRequestContext containerRequestContext,
+                                       String mediaTypeToProduce, String status) throws IllegalAccessException, InstantiationException{
+        final IDynamicResourceControllerDELETE cont = (IDynamicResourceControllerDELETE) controller.newInstance();
+        final MultivaluedMap<String, String> pathParams = containerRequestContext.getUriInfo().getPathParameters();
+        try {
+
+            final DynamicRequest dynamicRequest = new DynamicRequest(containerRequestContext,pathParams);
+            metricsRecorder.startTimerContext();
+
+            Integer statusCode = getStatusCode(status);
+
+            List<Status> supportedStatus = getSupportedStatusListForDELETEMethod();
+            verifyStatusIsSupportedForTheMethod(supportedStatus,statusCode);
+
+            if(status.equals(Status.NOCONTENT)){
+                return Response.status(statusCode).type(mediaTypeToProduce).build();
+            }else if(status.equals(Status.ACCEPTED)){
+                return Response.status(statusCode).entity(cont.process(dynamicRequest)).type(mediaTypeToProduce).build();
+            }
+
+            return Response.status(statusCode).type(mediaTypeToProduce).build();
+
+        }catch (Exception exp) {
+
+            return constructErrorResponse(exp,mediaTypeToProduce);
+
+        }finally
+        {
+            metricsRecorder.stopTimerContext();
+        }
+    }
+
+
+    private Response constructErrorResponse(Exception exp,String mediaTypeToProduce){
+
+        EpikosError error = new EpikosError();
+        String errorMessage = "";
+        Status status = Status.UNKNOWN;
+
+        if(exp instanceof UnrecognizedPropertyException){
+
+            errorMessage = String.format("Invalid input data : %s", ((UnrecognizedPropertyException)exp).getPropertyName());
+            status = Status.BADREQUEST;
+
+        }else {
+
+            errorMessage = exp.getMessage();
+            status = Status.INTERNALSERVERERROR;
+
+        }
+
+        error.setMessage(errorMessage);
+        error.setId(status.getStatus());
+        logger.error(errorMessage);
+        logger.error(exp.getMessage());
+        return Response.status(status.getStatus()).entity(error).type(mediaTypeToProduce).build();
+
+    }
+
+    private int getStatusCode(String status){
+        Integer statusCode = Status.OK.getStatus();
+        if(StringUtils.isNotEmpty(status)){
+            statusCode = Status.getStatusCode(status);
+            if(statusCode == null) {
+                try {
+                    statusCode = Status.valueOf(status).getStatus();
+                }catch (Exception exp){ //Exception shouldn't happen as status should have been verified and only valid status should come by this time ! But we will log error in case and that will be a bug to fix !
+                    logger.error(String.format("Panic: Bug, invalid status %s , failed to find corresponding status code ! returning status OK (200)",status));
+                }
+            }
+        }
+        return statusCode;
+    }
+
+    private final List<Status> getSupportedStatusListForPOSTMethod(){
+        List<Status> supportedStatusList = new ArrayList<>();
+        supportedStatusList.add(Status.OK);
+        supportedStatusList.add(Status.NOCONTENT);
+        supportedStatusList.add(Status.CREATED);
+        return supportedStatusList;
+    }
+
+    private final List<Status> getSupportedStatusListForPUTMethod(){
+        List<Status> supportedStatusList = new ArrayList<>();
+        supportedStatusList.add(Status.OK);
+        supportedStatusList.add(Status.NOCONTENT);
+        supportedStatusList.add(Status.CREATED);
+        return supportedStatusList;
+    }
+
+    private final List<Status> getSupportedStatusListForDELETEMethod(){
+        List<Status> supportedStatusList = new ArrayList<>();
+        supportedStatusList.add(Status.OK);
+        supportedStatusList.add(Status.NOCONTENT);
+        supportedStatusList.add(Status.ACCEPTED);
+        return supportedStatusList;
+    }
+
+    private void verifyStatusIsSupportedForTheMethod(List<Status> supportedStatusList,Integer statusCode){
+        //We will log error if status code is not supported
+        if(!supportedStatusList.stream().anyMatch(p->p.getStatus()==statusCode)){
+            logger.error(String.format("Panic: Status code %s is not supported hence status OK will be returned. Please verify status code is supported for PUT method !"));
+        }
+    }
+
+
 
 }

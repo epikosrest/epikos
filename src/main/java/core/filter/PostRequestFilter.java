@@ -1,6 +1,6 @@
 package core.filter;
 
-import core.domain.constants.DomainConst;
+import core.domain.constants.ENCODING_TYPE;
 import org.glassfish.jersey.spi.ContentEncoder;
 
 import javax.ws.rs.container.ContainerRequestContext;
@@ -26,8 +26,8 @@ public class PostRequestFilter implements ContainerRequestFilter {
 
         ContentEncoder encoder = new org.glassfish.jersey.message.GZipEncoder();
         List<String> contentEncoding = requestContext.getHeaders().get("content-encoding");
-        if (!requestContext.getMethod().equalsIgnoreCase(GET) && contentEncoding != null && contentEncoding.stream().anyMatch(encode->encode.equals(DomainConst.GZIP_ENCODING))){
-            requestContext.setEntityStream(encoder.decode(DomainConst.GZIP_ENCODING, requestContext.getEntityStream()));
+        if (!requestContext.getMethod().equalsIgnoreCase(GET) && contentEncoding != null && contentEncoding.stream().anyMatch(encode->encode.equals(ENCODING_TYPE.GZIP_ENCODING))){
+            requestContext.setEntityStream(encoder.decode(ENCODING_TYPE.GZIP_ENCODING, requestContext.getEntityStream()));
         }
         //ToDo: implement security feature
         /*final SecurityContext securityContext =
