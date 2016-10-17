@@ -35,22 +35,29 @@ public  class Metrics {
 
     private Class<?> classToRegister;
     //Counter
-    private Counter numberOfSendCharacters;
+    private Counter numberOfCharactersProcessedFromRequest;
+    private Counter numberOfCharacterReturnedInResponse;
     //Meter
-    private Meter sendMessages;
+    private Meter reqeustMessages;
+    private Meter responseMessages;
     //Timer
     private com.yammer.metrics.core.Timer responseTime;
-    private LinkedList<String> historyOfQueries;
+    private LinkedList<String> historyOfReqeustQueries;
     TimerContext timerContext;
 
 
 
     public Metrics(Class<?> classToReg){
         this.classToRegister = classToReg;
-        numberOfSendCharacters = com.yammer.metrics.Metrics.newCounter(classToReg, "Total-Byte-Processed");
-        sendMessages = com.yammer.metrics.Metrics.newMeter(classToReg,  "Number-Of-Request-Proccessed", "Send", TimeUnit.SECONDS);
+        numberOfCharactersProcessedFromRequest = com.yammer.metrics.Metrics.newCounter(classToReg, "Total-Request-Byte-Processed");
+        numberOfCharacterReturnedInResponse= com.yammer.metrics.Metrics.newCounter(classToReg, "Total-Response-Byte-Processed");
+
+        reqeustMessages = com.yammer.metrics.Metrics.newMeter(classToReg,  "Number-Of-Request-Processed", "Received", TimeUnit.SECONDS);
+        responseMessages = com.yammer.metrics.Metrics.newMeter(classToReg,  "Number-Of-Response-Processed", "Send", TimeUnit.SECONDS);
+
+
         responseTime = com.yammer.metrics.Metrics.newTimer(classToReg,  "Response-Time");
-        historyOfQueries = new LinkedList<String>();
+        historyOfReqeustQueries = new LinkedList<String>();
 
         {
             //Gauge
@@ -58,7 +65,7 @@ public  class Metrics {
 
                 @Override
                 public String value() {
-                    return historyOfQueries.getLast();
+                    return historyOfReqeustQueries.getLast();
                 }
             });
 
@@ -76,9 +83,15 @@ public  class Metrics {
         }
     }
 
-    public void updateMetrics(String message) {
-        numberOfSendCharacters.inc(message.length());
-        sendMessages.mark();
-        historyOfQueries.addLast(message);
+    public void updateRequestMetrics(int bodySize,String path) {
+        numberOfCharactersProcessedFromRequest.inc(bodySize);
+        reqeustMessages.mark();
+        historyOfReqeustQueries.addLast(path);
+    }
+
+    public void updateResponseMetrics(int bodySize, String path){
+        numberOfCharacterReturnedInResponse.inc(bodySize);
+        responseMessages.mark();
+        //historyOfQueries.addLast(path);
     }
 }
