@@ -32,11 +32,13 @@ import core.domain.enums.Method;
 import core.domain.enums.ServiceMode;
 import core.domain.enums.Status;
 import core.dynamic.resources.domain.*;
+import core.engine.processor.*;
 import core.error.EpikosError;
 import core.filter.PostRequestFilter;
 import core.filter.PreRequestFilter;
 import core.intereceptor.RequestReaderIntereceptor;
 import core.intereceptor.ResponseWriterInterceptor;
+import core.spoof.Spoof;
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.moxy.json.MoxyJsonConfig;
 import org.glassfish.jersey.process.Inflector;
@@ -153,40 +155,25 @@ public  class ServiceResourceConfig extends ResourceConfig {
                     @Override
                     public Response apply(ContainerRequestContext containerRequestContext) {
 
+                        metrics.Metrics metricsRecorder = null;
+                        Response response = Response.ok().build();
+                        RequestProcessor requestProcessor = null;
+
                         try {
 
                             final Class controller = drmetaData.getController() == null ? null : Class.forName(drmetaData.getController());
-                            final metrics.Metrics metricsRecorder = controller == null ? null : new metrics.Metrics(controller);
+                            metricsRecorder = controller == null ? drmetaData.getServiceMode() == ServiceMode.SPOOF ? new metrics.Metrics(Spoof.class) :null: new metrics.Metrics(controller);
+
+
+
                             if (metricsRecorder != null) {
-                                metricsRecorder.updateMetrics(containerRequestContext.getUriInfo().getPath());
+                                metricsRecorder.updateRequestMetrics(containerRequestContext.getEntityStream().toString().length(), containerRequestContext.getUriInfo().getPath());
                             }
                             //Check request,response and controller configuration exist and hook it appropriately
                             if (controller != null) {
 
-                                if (containerRequestContext.getRequest().getMethod().equals(Method.GET.getMethodName())) {
-
-                                    return processGETRequest(controller,metricsRecorder,containerRequestContext,drmetaData.getProduce());
-
-                                } else if (containerRequestContext.getRequest().getMethod().equals(Method.POST.getMethodName())){
-
-                                    return processPOSTRequest(controller,metricsRecorder,containerRequestContext,
-                                            drmetaData.getProduce(),drmetaData.getStatus());
-
-                                }else if (containerRequestContext.getRequest().getMethod().equals(Method.PUT.getMethodName())){
-
-                                    return processPUTRequest(controller,metricsRecorder,containerRequestContext,
-                                            drmetaData.getProduce(),drmetaData.getStatus());
-
-                                }else if (containerRequestContext.getRequest().getMethod().equals(Method.DELETE.getMethodName())){
-
-                                    return processDELETERequest(controller,metricsRecorder,containerRequestContext,
-                                            drmetaData.getProduce(),drmetaData.getStatus());
-
-                                }else if (containerRequestContext.getRequest().getMethod().equals(Method.PATCH.getMethodName())){
-                                    throw new NotImplementedException();
-                                }else{
-                                    throw new Exception("Panic: Unknown method");
-                                }
+                                response = RequestProcessorFactory.buildRequestProcessor(containerRequestContext.getRequest().getMethod(),
+                                        controller,metricsRecorder,containerRequestContext,drmetaData.getProduce(),drmetaData.getStatus()).process();
 
                             } else {
                                 //ToDo: add logic to construct processing request without controller. In this case either response or request and response must be provided
@@ -197,12 +184,17 @@ public  class ServiceResourceConfig extends ResourceConfig {
                                     if (metricsRecorder != null)
                                         metricsRecorder.startTimerContext();
                                     if(drmetaData.getServiceMode() == ServiceMode.SPOOF){
-                                        return Response.ok().entity(drmetaData.getResponseSpoof()).type(drmetaData.getProduce()).build();
+                                        requestProcessor = new SpoofRequestProcessor(metricsRecorder,drmetaData.getProduce(),drmetaData.getResponseSpoof(),drmetaData.getStatus());
+                                        response = requestProcessor.process(); //Response.ok().entity(drmetaData.getResponseSpoof()).type(drmetaData.getProduce()).build();
+                                    }else {
+                                        response = Response.ok().entity(drmetaData.getResponse()).type(drmetaData.getProduce()).build();
                                     }
-                                    return Response.ok().entity(drmetaData.getResponse()).type(drmetaData.getProduce()).build();
                                 } finally {
-                                    if (metricsRecorder != null)
+                                    if (metricsRecorder != null) {
+                                        metricsRecorder.updateResponseMetrics(response.getEntity().toString().length(), containerRequestContext.getUriInfo().getPath());
                                         metricsRecorder.stopTimerContext();
+                                        metricsRecorder = null;
+                                    }
                                 }
                             }
 
@@ -212,6 +204,12 @@ public  class ServiceResourceConfig extends ResourceConfig {
                             error.setMessage(exp.getMessage());
                             error.setId(Status.INTERNALSERVERERROR.getStatus());
                             return Response.status(error.getId()).entity(error).type(drmetaData.getProduce()).build();
+                        } finally {
+                            if (metricsRecorder != null) {
+                                metricsRecorder.updateResponseMetrics(response.getEntity().toString().length(), containerRequestContext.getUriInfo().getPath());
+                                metricsRecorder.stopTimerContext();
+                            }
+                            return response;
                         }
 
                     }
@@ -361,18 +359,18 @@ public  class ServiceResourceConfig extends ResourceConfig {
     //just register resource as is
     //If controller is not provided but request and response is then we will continue by registering resource as is where for
     //any request coming to the endpoint will be have response as provided
-    private boolean isExceptionalCase(Api Api){
-        if(Api.getController() == null &&
-                Api.getRequest() == null &&
-                Api.getResponse() == null){
+    private boolean isExceptionalCase(Api api){
+        if(api.getController() == null &&
+                api.getRequest() == null &&
+                api.getResponse() == null){
             return true;
         //This is to support Spoof mode or Spoof functionality
-        }else if(Api.getController() == null &&
-                Api.getResponse() != null
+        }else if(api.getController() == null &&
+                api.getResponse() != null
                 ){
             //Will only support JSON
             //ToDo add support for any other format like XML etc
-            if(isResourceASONObject(Api.getResponse(),Api)) {
+            if(isResourceASONObject(api.getResponse(),api)) {
                 return true;
             }
 
@@ -496,7 +494,7 @@ public  class ServiceResourceConfig extends ResourceConfig {
         return moxyJsonConfig.resolver();
     }
 
-    private Response processGETRequest(final Class controller,
+    /*private Response processGETRequest(final Class controller,
                                        final metrics.Metrics metricsRecorder,
                                    final ContainerRequestContext containerRequestContext,
                                    String mediaTypeToProduce) throws IllegalAccessException, InstantiationException{
@@ -522,9 +520,9 @@ public  class ServiceResourceConfig extends ResourceConfig {
         } finally {
             metricsRecorder.stopTimerContext();
         }
-    }
+    }*/
 
-    private Response processPOSTRequest(final Class controller,
+    /*private Response processPOSTRequest(final Class controller,
                                         final metrics.Metrics metricsRecorder,
                                         final ContainerRequestContext containerRequestContext,
                                         String mediaTypeToProduce,String status) throws Exception{
@@ -555,7 +553,7 @@ public  class ServiceResourceConfig extends ResourceConfig {
         finally {
             metricsRecorder.stopTimerContext();
         }
-    }
+    }*/
 
     /*
     The function process PUT request.
@@ -564,7 +562,7 @@ public  class ServiceResourceConfig extends ResourceConfig {
     If any other status is listed then it will return OK. In case of error BAD REQUEST and INTERNAL SERVICE ERROR
     with appropriate error message will return
      */
-    private Response processPUTRequest(final Class controller,
+    /*private Response processPUTRequest(final Class controller,
                                        final metrics.Metrics metricsRecorder,
                                        final ContainerRequestContext containerRequestContext,
                                        String mediaTypeToProduce, String status) throws IllegalAccessException, InstantiationException{
@@ -576,7 +574,7 @@ public  class ServiceResourceConfig extends ResourceConfig {
             final DynamicRequest dynamicRequest = new DynamicRequest(containerRequestContext,pathParams);
             metricsRecorder.startTimerContext();
 
-            Integer statusCode = getStatusCode(status);
+            Integer statusCode = Status.getStatusCode(status);
 
             List<Status> supportedStatus = getSupportedStatusListForPUTMethod();
             verifyStatusIsSupportedForTheMethod(supportedStatus,statusCode);
@@ -597,7 +595,7 @@ public  class ServiceResourceConfig extends ResourceConfig {
         {
             metricsRecorder.stopTimerContext();
         }
-    }
+    }*/
 
     /*
     The function process DELETE request.
@@ -606,7 +604,7 @@ public  class ServiceResourceConfig extends ResourceConfig {
     If any other status is listed then it will return OK. In case of error BAD REQUEST and INTERNAL SERVICE ERROR
     with appropriate error message will return
      */
-    private Response processDELETERequest(final Class controller,
+    /*private Response processDELETERequest(final Class controller,
                                        final metrics.Metrics metricsRecorder,
                                        final ContainerRequestContext containerRequestContext,
                                        String mediaTypeToProduce, String status) throws IllegalAccessException, InstantiationException{
@@ -638,36 +636,12 @@ public  class ServiceResourceConfig extends ResourceConfig {
         {
             metricsRecorder.stopTimerContext();
         }
-    }
+    }*/
 
 
-    private Response constructErrorResponse(Exception exp,String mediaTypeToProduce){
 
-        EpikosError error = new EpikosError();
-        String errorMessage = "";
-        Status status = Status.UNKNOWN;
 
-        if(exp instanceof UnrecognizedPropertyException){
-
-            errorMessage = String.format("Invalid input data : %s", ((UnrecognizedPropertyException)exp).getPropertyName());
-            status = Status.BADREQUEST;
-
-        }else {
-
-            errorMessage = exp.getMessage();
-            status = Status.INTERNALSERVERERROR;
-
-        }
-
-        error.setMessage(errorMessage);
-        error.setId(status.getStatus());
-        logger.error(errorMessage);
-        logger.error(exp.getMessage());
-        return Response.status(status.getStatus()).entity(error).type(mediaTypeToProduce).build();
-
-    }
-
-    private int getStatusCode(String status){
+    /*private int getStatusCode(String status){
         Integer statusCode = Status.OK.getStatus();
         if(StringUtils.isNotEmpty(status)){
             statusCode = Status.getStatusCode(status);
@@ -680,38 +654,30 @@ public  class ServiceResourceConfig extends ResourceConfig {
             }
         }
         return statusCode;
-    }
+    }*/
 
-    private final List<Status> getSupportedStatusListForPOSTMethod(){
+    /*private final List<Status> getSupportedStatusListForPUTMethod(){
         List<Status> supportedStatusList = new ArrayList<>();
         supportedStatusList.add(Status.OK);
         supportedStatusList.add(Status.NOCONTENT);
         supportedStatusList.add(Status.CREATED);
         return supportedStatusList;
-    }
+    }*/
 
-    private final List<Status> getSupportedStatusListForPUTMethod(){
-        List<Status> supportedStatusList = new ArrayList<>();
-        supportedStatusList.add(Status.OK);
-        supportedStatusList.add(Status.NOCONTENT);
-        supportedStatusList.add(Status.CREATED);
-        return supportedStatusList;
-    }
-
-    private final List<Status> getSupportedStatusListForDELETEMethod(){
+    /*private final List<Status> getSupportedStatusListForDELETEMethod(){
         List<Status> supportedStatusList = new ArrayList<>();
         supportedStatusList.add(Status.OK);
         supportedStatusList.add(Status.NOCONTENT);
         supportedStatusList.add(Status.ACCEPTED);
         return supportedStatusList;
-    }
+    }*/
 
-    private void verifyStatusIsSupportedForTheMethod(List<Status> supportedStatusList,Integer statusCode){
+    /*private void verifyStatusIsSupportedForTheMethod(List<Status> supportedStatusList,Integer statusCode){
         //We will log error if status code is not supported
         if(!supportedStatusList.stream().anyMatch(p->p.getStatus()==statusCode)){
             logger.error(String.format("Panic: Status code %s is not supported hence status OK will be returned. Please verify status code is supported for PUT method !"));
         }
-    }
+    }*/
 
 
 
