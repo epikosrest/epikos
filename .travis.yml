@@ -5,5 +5,9 @@ language: java
 jdk:
   - oraclejdk8
 
+env:
+  global:
+    - JAVA_HOME=/usr/lib/jvm/java-8-oracle
+
 after_success:
   - bash <(curl -s https://codecov.io/bash)
