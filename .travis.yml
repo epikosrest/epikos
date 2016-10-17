@@ -1,10 +1,18 @@
+# language
 language: java
+
+# version numbers
 jdk:
   - oraclejdk8
-addons:
-    apt:
-    packages:
-    - oracle-java8-installer
-script: mvn clean verify
+
+before_install:
+  - apt-get update
+  - apt-get install -y maven
+
+before_script:
+   - if [[ $SHIPPABLE_JDK_VERSION == "oraclejdk8" ]] ; then export JAVA_HOME="/usr/lib/jvm/java-8-oracle"; export PATH="$PATH:/usr/lib/jvm/java-8-oracle/bin"; export java_path="/usr/lib/jvm/java-8-oracle/jre/bin/java"; fi
+   - update-alternatives --set java $java_path
+   - java -version
+
 after_success:
   - bash <(curl -s https://codecov.io/bash)
