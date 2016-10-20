@@ -5,6 +5,9 @@ language: java
 jdk:
   - oraclejdk8
 
+script:
+  - jdk_switcher use oraclejdk8
+
 env:
   global:
     - JAVA_HOME=/usr/lib/jvm/java-8-oracle
