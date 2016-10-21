@@ -1,11 +1,10 @@
 package core.domain.enums;
 
-import lombok.Getter;
 
 /**
  * Created by nitina on 8/20/16.
  */
-@Getter
+
 public enum Method {
 
     DELETE("DELETE"),GET("GET"),PATCH("PATCH"),POST("POST"),PUT("PUT");
@@ -15,4 +14,8 @@ public enum Method {
     }
 
     String methodName;
+
+    public String getMethodName() {
+        return methodName;
+    }
 }

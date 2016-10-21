@@ -1,6 +1,6 @@
 package core.domain.enums;
 
-import lombok.Getter;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 
@@ -10,7 +10,7 @@ import java.util.Map;
 /**
  * Created by nitina on 9/30/16.
  */
-@Getter
+
 public enum Status {
 
     //Ref:https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
@@ -38,4 +38,11 @@ public enum Status {
         return lookup.get(status);
     }
 
+    public int getStatus() {
+        return status;
+    }
+
+    public static Map<String, Integer> getLookup() {
+        return lookup;
+    }
 }
