@@ -8,9 +8,8 @@ jdk:
 script:
   - jdk_switcher use oraclejdk8
 
-env:
-  global:
-    - JAVA_HOME=/usr/lib/jvm/java-8-oracle
+before_install:
+    - export JAVA_HOME=/usr/lib/jvm/java-8-oracle
 
 install: mvn install -Dmaven.compiler.target=1.8 -Dmaven.compiler.source=1.8 -DskipTests=true
 
