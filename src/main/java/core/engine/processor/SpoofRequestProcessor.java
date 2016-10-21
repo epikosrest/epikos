@@ -1,6 +1,5 @@
 package core.engine.processor;
 
-import lombok.Data;
 import metrics.Metrics;
 
 import javax.ws.rs.core.Response;
@@ -8,7 +7,7 @@ import javax.ws.rs.core.Response;
 /**
  * Created by nitina on 10/15/16.
  */
-@Data
+
 public class SpoofRequestProcessor extends RequestProcessor{
 
     String responseSpoof;
@@ -21,5 +20,13 @@ public class SpoofRequestProcessor extends RequestProcessor{
     @Override
     public Response process() throws IllegalAccessException, InstantiationException {
         return Response.ok().entity(responseSpoof).type(mediaTypeToProduce).build();
+    }
+
+    public String getResponseSpoof() {
+        return responseSpoof;
+    }
+
+    public void setResponseSpoof(String responseSpoof) {
+        this.responseSpoof = responseSpoof;
     }
 }

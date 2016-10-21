@@ -1,6 +1,17 @@
+# language
 language: java
+
+# version numbers
 jdk:
   - oraclejdk8
-script: mvn clean verify
+
+script:
+  - jdk_switcher use oraclejdk8
+
+before_install:
+    - export JAVA_HOME=/usr/lib/jvm/java-8-oracle
+
+install: mvn install -Dmaven.compiler.target=1.8 -Dmaven.compiler.source=1.8 -DskipTests=true
+
 after_success:
   - bash <(curl -s https://codecov.io/bash)

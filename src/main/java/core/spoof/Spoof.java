@@ -1,11 +1,9 @@
 package core.spoof;
 
-import lombok.Data;
-
 /**
  * Created by nitina on 10/15/16.
  */
-@Data
+
 public class Spoof {
     String apiName;
 
@@ -13,4 +11,11 @@ public class Spoof {
         this.apiName = apiName;
     }
 
+    public String getApiName() {
+        return apiName;
+    }
+
+    public void setApiName(String apiName) {
+        this.apiName = apiName;
+    }
 }
