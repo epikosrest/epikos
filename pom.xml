@@ -283,7 +283,7 @@ SOFTWARE.>
 					<check />
 				</configuration>
 			</plugin>
-			
+
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>appassembler-maven-plugin</artifactId>
