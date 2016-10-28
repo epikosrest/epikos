@@ -340,16 +340,13 @@ SOFTWARE.>
 				<version>0.7.7.201606060606</version>
 				<executions>
 					<execution>
-						<goals>
-							<goal>prepare-agent</goal>
-						</goals>
+						<id>default-prepare-agent</id>
+						<goals><goal>prepare-agent</goal></goals>
 					</execution>
 					<execution>
-						<id>report</id>
-						<phase>test</phase>
-						<goals>
-							<goal>report</goal>
-						</goals>
+						<id>default-report</id>
+						<phase>prepare-package</phase>
+						<goals><goal>report</goal></goals>
 					</execution>
 				</executions>
 			</plugin>
