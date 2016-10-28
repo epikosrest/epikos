@@ -14,4 +14,4 @@ before_install:
 install: mvn install -Dmaven.compiler.target=1.8 -Dmaven.compiler.source=1.8 -DskipTests=true
 
 after_success:
-  - bash <(curl -s https://codecov.io/bash) -t 200e5cc3ff86488581b742f70533f9f0
+  - bash <(curl -s https://codecov.io/bash)
