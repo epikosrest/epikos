@@ -1,3 +1,4 @@
+import core.spoof.Spoof;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,6 +21,12 @@ public class UnitTest {
     public void testDummy() {
 
         Assert.assertEquals(true,true);
+    }
+
+    @Test
+    public void testService(){
+        Spoof spoof = new Spoof("epikos api");
+        Assert.assertNotNull(spoof);
     }
 
 }
