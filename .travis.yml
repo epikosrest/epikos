@@ -11,7 +11,7 @@ script:
 before_install:
     - export JAVA_HOME=/usr/lib/jvm/java-8-oracle
 
-install: mvn install -Dmaven.compiler.target=1.8 -Dmaven.compiler.source=1.8 -DskipTests=true
+install: mvn clean install
 
 after_success:
   - bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"
