@@ -23,3 +23,6 @@ install: mvn clean install
 
 after_success:
   - bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"
+
+notifications:
+  slack: epikosrest:ijOc8XFeZs4uRbi8CyxWw9gI
