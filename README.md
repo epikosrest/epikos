@@ -55,8 +55,9 @@ IDE : IntelliJ IDEA (recommended), Eclipse
 
 How To :
 
-1. To clone the service 
+1. Clone the service 
 $ git clone https://github.com/epikosrest/epikos.git
+
 2. Compile the service 
 $ mvn clean install
 
@@ -68,9 +69,8 @@ Resources
 Source Controller (GitHub):
 Repo : https://github.com/epikosrest/epikos
 
-Continuous Build System (Jenkin):
-A temporary Jenkin job has been setup and will trigger build for every push event on Master branch:
-http://54.191.157.117:8080/job/EpikosRestService/
+Continuous Build (travis-ci):
+https://travis-ci.org/epikosrest/epikos
 
 Collaboration, Project Management and Tracking (Trello) :
 Please subscribe/checkout following Trello link for on going project development and task.
@@ -79,7 +79,18 @@ https://trello.com/b/7Bw9gke5/epikos-rest-service
 (Slack) : Please tune in to following slack channel for update and notification of on going activity
 https://epikosrest.slack.com/messages/epikosservice/
 
+CodeCoverage and code analysis
+
+codecov.io
+https://codecov.io/gh/epikosrest/epikos
+
+Sonarqube
+https://sonarqube.com/dashboard/index?id=com.nepaliapps%3AEpikosRestService
+
+codacy
+https://www.codacy.com/app/epikosrest/epikos/dashboard
 
 This service is free and can be used by anyone to enhance and use for any purpose and hence being released under MIT License
+
 Feedback are welcome: please send it to epikosrest@gmail.com
 
