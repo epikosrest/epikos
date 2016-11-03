@@ -19,7 +19,7 @@ public class PreRequestFilter implements ContainerRequestFilter {
         //ToDo: at this time we have not implemented any specific functionality using pre ContainerReqeustFilter
         //At minimum will just match PUT to POST internally and route all PUT request to POST method
 
-        if (requestContext.getMethod().equals(HttpMethod.PUT)) {
+        if (requestContext.getMethod().equalsIgnoreCase(HttpMethod.PUT)) {
             requestContext.setMethod(HttpMethod.POST);
         }
     }

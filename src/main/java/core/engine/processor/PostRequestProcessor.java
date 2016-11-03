@@ -39,9 +39,9 @@ public class PostRequestProcessor extends RequestProcessor{
             List<Status> supportedStatus = getSupportedStatusListForPOSTMethod();
             verifyStatusIsSupportedForTheMethod(supportedStatus,statusCode);
 
-            if(status.equals(Status.NOCONTENT)){
+            if(status.equalsIgnoreCase(Status.NOCONTENT.name())){
                 return Response.status(statusCode).type(mediaTypeToProduce).build();
-            }else if(status.equals(Status.CREATED)){
+            }else if(status.equalsIgnoreCase(Status.CREATED.name())){
                 return Response.status(statusCode).entity(cont.process(dynamicRequest)).type(mediaTypeToProduce).location(containerRequestContext.getUriInfo().getAbsolutePath()).build();
             }
 

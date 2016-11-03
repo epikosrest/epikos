@@ -22,17 +22,21 @@ SOFTWARE.
 
 package core.service;
 
+import core.exception.EpikosException;
 import core.lib.configuration.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 
-final public class ServiceMetaData implements  IServiceMetaData{
+public final class ServiceMetaData implements  IServiceMetaData{
 
-    final static Logger logger = LoggerFactory.getLogger(ServiceMetaData.class);
+    static final Logger logger = LoggerFactory.getLogger(ServiceMetaData.class);
+    static final String uriPath = "/";
+    static final String DEFAULT_PORT_NUMBER = "8080";
+    static final String DEFAULT_SERVICE_NAME = "epikos";
 
-    final String uriPath = "/";
     String hostName;
     String portNumber;
     String serviceName;
@@ -40,8 +44,7 @@ final public class ServiceMetaData implements  IServiceMetaData{
     String serviceURI;
     String dynamicResourceConfigLocation;
 
-    final String DEFAULT_PORT_NUMBER = "8080";
-    final String DEFAULT_SERVICE_NAME = "epikos";
+
 
     public ServiceMetaData(Configuration config) throws Exception{
         setMetaData(config);
@@ -79,6 +82,7 @@ final public class ServiceMetaData implements  IServiceMetaData{
         this.serviceName = serviceName;
     }
 
+    @Override
     public String[] getResourcePackageName() {
         return resourcePackageName;
     }
@@ -87,6 +91,7 @@ final public class ServiceMetaData implements  IServiceMetaData{
         this.resourcePackageName = resourcePackageName;
     }
 
+    @Override
     public String getServiceURI() {
         return serviceURI;
     }
@@ -104,13 +109,13 @@ final public class ServiceMetaData implements  IServiceMetaData{
         this.dynamicResourceConfigLocation = dynamicResourceConfigLocation;
     }
 
-    void setMetaData(Configuration config) throws Exception{
+    void setMetaData(Configuration config) throws EpikosException,UnknownHostException {
         if(config == null || config.getProperties()==null){
             throw new RuntimeException("Configuration must not be null. Please check the configuration file is present and properly configured");
         }
-        String portNumber = config.getProperties().getProperty("port");
+        String portNum = config.getProperties().getProperty("port");
         hostName = InetAddress.getLocalHost().getHostName();
-        portNumber = portNumber==null?DEFAULT_PORT_NUMBER:portNumber;
+        portNumber = portNum==null?DEFAULT_PORT_NUMBER:portNum;
         serviceName = config.getProperties().getProperty("service.name") == null ?DEFAULT_SERVICE_NAME:config.getProperties().getProperty("service.name");
         resourcePackageName = config.getProperties().getProperty("resource.package.name") == null?
                                 null:config.getProperties().getProperty("resource.package.name").split(";");

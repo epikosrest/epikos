@@ -20,7 +20,8 @@ import java.util.List;
 
 public abstract class RequestProcessor {
 
-    final static Logger logger = LoggerFactory.getLogger(RequestProcessor.class);
+    static final Logger logger = LoggerFactory.getLogger(RequestProcessor.class);
+
     Class controller;
     Metrics metricsRecorder;
     ContainerRequestContext containerRequestContext;

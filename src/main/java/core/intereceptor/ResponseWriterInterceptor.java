@@ -36,7 +36,7 @@ public class ResponseWriterInterceptor implements WriterInterceptor {
         // Compress if client accepts gzip encoding
         if(acceptEncoding!=null) {
 
-            if (acceptEncoding.stream().anyMatch(encode->encode.equals(ENCODING_TYPE.GZIP_ENCODING))) {
+            if (acceptEncoding.stream().anyMatch(encode->encode.equalsIgnoreCase(ENCODING_TYPE.GZIP_ENCODING))) {
 
                 MultivaluedMap<String, Object> headers = context.getHeaders();
                 headers.add(HttpHeaders.CONTENT_ENCODING, ENCODING_TYPE.GZIP_ENCODING);

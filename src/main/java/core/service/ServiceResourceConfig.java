@@ -22,18 +22,15 @@ SOFTWARE.
 
 package core.service;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.MappingJsonFactory;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import com.wordnik.swagger.jaxrs.config.BeanConfig;
-import core.domain.enums.Method;
 import core.domain.enums.ServiceMode;
 import core.domain.enums.Status;
 import core.dynamic.resources.domain.*;
-import core.engine.processor.*;
+import core.engine.processor.RequestProcessor;
+import core.engine.processor.RequestProcessorFactory;
+import core.engine.processor.SpoofRequestProcessor;
 import core.error.EpikosError;
+import core.exception.EpikosException;
 import core.filter.PostRequestFilter;
 import core.filter.PreRequestFilter;
 import core.intereceptor.RequestReaderIntereceptor;
@@ -50,25 +47,22 @@ import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.parser.ParserException;
 import restserver.Service;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
-import javax.ws.rs.BadRequestException;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ContextResolver;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 
 /**
  * Created by nitina on 5/4/16.
@@ -76,9 +70,9 @@ import javax.script.ScriptEngineManager;
 public  class ServiceResourceConfig extends ResourceConfig {
 
     IServiceMetaData metaData;
-    final static Logger logger = LoggerFactory.getLogger(ServiceResourceConfig.class);
+    static final Logger logger = LoggerFactory.getLogger(ServiceResourceConfig.class);
 
-    public ServiceResourceConfig(IServiceMetaData metaData) throws Exception{
+    public ServiceResourceConfig(IServiceMetaData metaData) throws EpikosException {
         this.metaData = metaData;
 
         List<Api> apiList = new ArrayList<>();
@@ -88,10 +82,13 @@ public  class ServiceResourceConfig extends ResourceConfig {
             buildAndRegisterDynamicResource(apiList, metaData.getServiceURI());
 
         }catch (IOException ioExp){
-            buildAndRegisterInvalidDocInfo("The dynamic resource api list file is not available. Please check the value dynamic.resource.configuration in Application.configuration file and make sure the file exist !\n" + ioExp.getMessage());
-
+            String errorMsg = String.format("The dynamic resource api list file is not available. Please check the value dynamic.resource.configuration in Application.configuration file and make sure the file exist ! \n%s",ioExp.getMessage());
+            buildAndRegisterInvalidDocInfo(errorMsg);
+            logger.error(errorMsg);
         }catch (ParserException parserExp){
-            buildAndRegisterInvalidDocInfo("The dynamic resource api list is an invalid yaml file. Please check the api list and fix following issue \n" + parserExp.getMessage());
+            String errorMsg = String.format("The dynamic resource api list is an invalid yaml file. Please check the api list and fix following issue \n%s", parserExp.getMessage());
+            buildAndRegisterInvalidDocInfo(errorMsg);
+            logger.error(errorMsg);
         }
 
         register(com.wordnik.swagger.jersey.listing.ApiListingResourceJSON.class);
@@ -112,7 +109,6 @@ public  class ServiceResourceConfig extends ResourceConfig {
     /**
      * Created by nitina on 4/25/16.
      */
-    //ToDo: Investigate and research and verify if anything need to be added/changed and why to implement
     public static class CrossDomainFilter implements ContainerResponseFilter {
 
         @Override
@@ -150,7 +146,7 @@ public  class ServiceResourceConfig extends ResourceConfig {
 
 
         methodBuilder.produces(drmetaData.getProduce())
-                .handledBy(new Inflector<ContainerRequestContext, Response>() {
+                .handledBy(p->new Inflector<ContainerRequestContext, Response>() {
 
                     @Override
                     public Response apply(ContainerRequestContext containerRequestContext) {
@@ -176,9 +172,6 @@ public  class ServiceResourceConfig extends ResourceConfig {
                                         controller,metricsRecorder,containerRequestContext,drmetaData.getProduce(),drmetaData.getStatus()).process();
 
                             } else {
-                                //ToDo: add logic to construct processing request without controller. In this case either response or request and response must be provided
-
-                                //ToDo: currently responseSpoof property is only being used by Api builder resource to display Api doc
                                 //Need to identify good way to handle this  and get rid of responseData property !
                                 try {
                                     if (metricsRecorder != null)
@@ -209,8 +202,9 @@ public  class ServiceResourceConfig extends ResourceConfig {
                                 metricsRecorder.updateResponseMetrics(response.getEntity().toString().length(), containerRequestContext.getUriInfo().getPath());
                                 metricsRecorder.stopTimerContext();
                             }
-                            return response;
+
                         }
+                        return response;
 
                     }
 
@@ -224,29 +218,23 @@ public  class ServiceResourceConfig extends ResourceConfig {
     * Load dynamic resource from config file. Note the config file can be anyfile defined in Application.properties file
     * as value of key dynamic.resource.configuration
      */
-    private List<Api> loadDynamicResource(String dynamicResourceFileName) throws IOException,ParserException{
+    private List<Api> loadDynamicResource(String dynamicResourceFileName) throws IOException{
 
         //Load dynamic resource information from file specified as value of key dynamic.resource.configuration defined in Application.Configuraiton
         DynamicResourceContainer dynamicResource = new DynamicResourceContainer();
-
         dynamicResource = loadDynamicResourceFromYaml(dynamicResourceFileName);
-
-
-        if(dynamicResource == null){
-            return null;
-        }
         return dynamicResource.getApiList();
 
     }
 
-    private DynamicResourceContainer loadDynamicResourceFromYaml(String fileName) throws IOException,ParserException{
+    private DynamicResourceContainer loadDynamicResourceFromYaml(String fileName) throws IOException{
 
         Yaml yaml = new Yaml();
         DynamicResourceContainer config = null;
         final String fileSeparator = System.getProperty("file.separator");
-        final  String DEFAULT_CONFIGURATION_FOLDER_NAME = "Config";
+        final  String defaultConfigurationFolderName = "Config";
         String yamlFileFullPath = System.getProperty("user.dir") + fileSeparator
-                + DEFAULT_CONFIGURATION_FOLDER_NAME + fileSeparator + fileName;
+                + defaultConfigurationFolderName + fileSeparator + fileName;
 
         try( InputStream in = Files.newInputStream( Paths.get(yamlFileFullPath) ) ) {
             config = yaml.loadAs( in, DynamicResourceContainer.class );
@@ -268,7 +256,7 @@ public  class ServiceResourceConfig extends ResourceConfig {
         ResourceDocumentBuilder resourceDocumentBuilder = new ResourceDocumentBuilder();
         List<Resource> validResourceList = new ArrayList<>();
         if(apiList != null) {
-            Resource resource = null;
+            Resource resource;
             for (Api api : apiList) {
 
                 if (validateDynamicResource(api, resourceDocumentBuilder)) {
@@ -305,30 +293,30 @@ public  class ServiceResourceConfig extends ResourceConfig {
         }
 
         //Othewise validate if any one of component (request,response and controller) present and is valid
-        boolean resourceFound = (resourceClassExist(api.getController(),
+        boolean resourceFound = resourceClassExist(api.getController(),
                 IDynamicResourceController.class.getTypeName()+";"+
                         IDynamicResourceControllerGet.class.getTypeName() + ";" +
                         IDynamicResourceControllerPOST.class.getTypeName()
-                ,resourceDocumentBuilder));
+                ,resourceDocumentBuilder);
         if(!resourceFound){
             buildInvalidInformation(api,resourceDocumentBuilder);
             resourceFound = false;
         }
         if(api.getRequest() != null && !resourceClassExist(api.getRequest()
-                ,"NA",resourceDocumentBuilder)){
-            if(!isResourceASONObject(api.getRequest(),null)) {
+                ,"NA",resourceDocumentBuilder) && !isResourceAJSONObject(api.getRequest(),null)){
 
                 buildInvalidInformation(api, resourceDocumentBuilder);
                 resourceFound = false;
-            }
+
         }
 
         if(api.getResponse() != null && !resourceClassExist(api.getResponse()
-                ,"NA",resourceDocumentBuilder)){
-            if(!isResourceASONObject(api.getResponse(),null)) {
+                ,"NA",resourceDocumentBuilder) &&
+                !isResourceAJSONObject(api.getResponse(),null)){
+
                 buildInvalidInformation(api, resourceDocumentBuilder);
                 resourceFound = false;
-            }
+
         }
 
         if(StringUtils.isEmpty(api.getStatus()) || StringUtils.isBlank(api.getStatus()) || !isValidStatusCode(api.getStatus())){
@@ -366,13 +354,14 @@ public  class ServiceResourceConfig extends ResourceConfig {
             return true;
         //This is to support Spoof mode or Spoof functionality
         }else if(api.getController() == null &&
-                api.getResponse() != null
+                api.getResponse() != null &&
+                isResourceAJSONObject(api.getResponse(),api)
                 ){
             //Will only support JSON
             //ToDo add support for any other format like XML etc
-            if(isResourceASONObject(api.getResponse(),api)) {
+
                 return true;
-            }
+
 
         }
         return false;
@@ -400,7 +389,7 @@ public  class ServiceResourceConfig extends ResourceConfig {
             Class[] interfaceImplemented = classToVerify.getInterfaces();
 
             // will pass the check for the timebeing if resourceType is "NA" but need a better way to handle and implement it !
-            if(resourceType.equals("NA")) {
+            if("NA".equalsIgnoreCase(resourceType)){
                 return true;
             }
             //Check if the resource class has implemented correct interface i.e. IDynamicController/Get/POST
@@ -412,40 +401,40 @@ public  class ServiceResourceConfig extends ResourceConfig {
                 }
             }
             //If not that means the resource doesn't implement the expected interface hence will log invalid information and reutrn false
-            resouceDocumentBuilder.updateResourceInvalidInformation(String.format("Resource class name %s don't implement any one of %s interface hence this resource can not be hooked up while constructing resource ! \nPlease implement at least one of the interface in the controller  !",className,resourceType));
+            resouceDocumentBuilder.updateResourceInvalidInformation(String.format("Resource class name %s don't implement any one of %s interface hence this resource can not be hooked up while constructing resource ! %nPlease implement at least one of the interface in the controller  !",className,resourceType));
             return false;
 
         }catch (ClassNotFoundException cnfExp){
-            resouceDocumentBuilder.updateResourceInvalidInformation(String.format("Resource class name %s doesn't exist !",
-                    className));
+            String errorMsg = String.format("Resource class name %s doesn't exist !", className);
+            resouceDocumentBuilder.updateResourceInvalidInformation(errorMsg);
+            logger.error(errorMsg);
             return false;
         }
     }
 
-    private boolean isResourceASONObject(String resourceData,Api api){
-        try {
+    private boolean isResourceAJSONObject(String resourceData,Api api){
             final String fileSeparator = System.getProperty("file.separator");
             final String baseDir = System.getProperty("user.dir");
             final String spoofFilePath = baseDir + fileSeparator + resourceData;
-        ObjectMapper mapper = new ObjectMapper();
-        JsonFactory jfactory = new MappingJsonFactory();
-            JsonParser jParser = jfactory.createJsonParser(new File(spoofFilePath));
-            String value = readFile(spoofFilePath);
-            if(api != null){
-                api.setResponseSpoof(value);
-                api.setServiceMode(ServiceMode.SPOOF);
+
+            try {
+                String value = readFile(spoofFilePath);
+                if (api != null) {
+                    api.setResponseSpoof(value);
+                    api.setServiceMode(ServiceMode.SPOOF);
+                }
+                return true;
+            }catch (IOException ioExp){
+              logger.warn(ioExp.getMessage());
             }
-            return true;
-        }catch (IOException ioExp){
-            return false;
-        }
+        return false;
 
     }
 
-    public static String readFile(String filename) {
+    public static String readFile(String filename) throws IOException {
         String result = "";
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(filename));
+        try (
+                BufferedReader br = new BufferedReader(new FileReader(filename))) {
             StringBuilder sb = new StringBuilder();
             String line = br.readLine();
             while (line != null) {
@@ -453,10 +442,8 @@ public  class ServiceResourceConfig extends ResourceConfig {
                 line = br.readLine();
             }
             result = sb.toString();
-        } catch(Exception e) {
-            e.printStackTrace();
+            return result;
         }
-        return result;
     }
 
     /***
@@ -493,192 +480,5 @@ public  class ServiceResourceConfig extends ResourceConfig {
                         .setNamespaceSeparator(':');
         return moxyJsonConfig.resolver();
     }
-
-    /*private Response processGETRequest(final Class controller,
-                                       final metrics.Metrics metricsRecorder,
-                                   final ContainerRequestContext containerRequestContext,
-                                   String mediaTypeToProduce) throws IllegalAccessException, InstantiationException{
-        final IDynamicResourceControllerGet cont = (IDynamicResourceControllerGet) controller.newInstance();
-        final MultivaluedMap<String, String> pathParams = containerRequestContext.getUriInfo().getPathParameters();
-        try {
-
-            final DynamicRequest dynamicRequest = new DynamicRequest(containerRequestContext,pathParams);
-            metricsRecorder.startTimerContext();
-            Object response = cont.process(dynamicRequest);
-            if(response instanceof Response){
-                Response respToReturn = (Response)response;
-                if(!mediaTypeToProduce.toLowerCase().equals(respToReturn.getMediaType().toString().toLowerCase())){
-                   logger.warn(String.format("Panic : media type to produce is missmatching ! Expected to produce %s but returned %s",mediaTypeToProduce,respToReturn.getMediaType()));
-                }
-
-                //respToReturn.getStatusInfo()
-                return respToReturn;
-            }
-
-            return Response.ok().entity(response).type(mediaTypeToProduce).build();
-
-        } finally {
-            metricsRecorder.stopTimerContext();
-        }
-    }*/
-
-    /*private Response processPOSTRequest(final Class controller,
-                                        final metrics.Metrics metricsRecorder,
-                                        final ContainerRequestContext containerRequestContext,
-                                        String mediaTypeToProduce,String status) throws Exception{
-        final IDynamicResourceControllerPOST cont = (IDynamicResourceControllerPOST) controller.newInstance();
-        final MultivaluedMap<String, String> pathParams = containerRequestContext.getUriInfo().getPathParameters();
-
-        try {
-
-            final DynamicRequest dynamicRequest = new DynamicRequest(containerRequestContext,pathParams);
-            metricsRecorder.startTimerContext();
-
-            Integer statusCode = getStatusCode(status);
-
-            List<Status> supportedStatus = getSupportedStatusListForPOSTMethod();
-            verifyStatusIsSupportedForTheMethod(supportedStatus,statusCode);
-
-            if(status.equals(Status.NOCONTENT)){
-                return Response.status(statusCode).type(mediaTypeToProduce).build();
-            }else if(status.equals(Status.CREATED)){
-                return Response.status(statusCode).entity(cont.process(dynamicRequest)).type(mediaTypeToProduce).location(containerRequestContext.getUriInfo().getAbsolutePath()).build();
-            }
-
-            return Response.status(statusCode).type(mediaTypeToProduce).build();
-
-        }catch (Exception exp){
-            return constructErrorResponse(exp,mediaTypeToProduce);
-        }
-        finally {
-            metricsRecorder.stopTimerContext();
-        }
-    }*/
-
-    /*
-    The function process PUT request.
-    Param status in this method determines what kind of response to return.
-    As per RFC ref https://tools.ietf.org/html/rfc2616#section-9.6 It only supports NOCONTENT, CREATED and OK
-    If any other status is listed then it will return OK. In case of error BAD REQUEST and INTERNAL SERVICE ERROR
-    with appropriate error message will return
-     */
-    /*private Response processPUTRequest(final Class controller,
-                                       final metrics.Metrics metricsRecorder,
-                                       final ContainerRequestContext containerRequestContext,
-                                       String mediaTypeToProduce, String status) throws IllegalAccessException, InstantiationException{
-        final IDynamicResourceControllerPUT cont = (IDynamicResourceControllerPUT) controller.newInstance();
-        final MultivaluedMap<String, String> pathParams = containerRequestContext.getUriInfo().getPathParameters();
-
-        try {
-
-            final DynamicRequest dynamicRequest = new DynamicRequest(containerRequestContext,pathParams);
-            metricsRecorder.startTimerContext();
-
-            Integer statusCode = Status.getStatusCode(status);
-
-            List<Status> supportedStatus = getSupportedStatusListForPUTMethod();
-            verifyStatusIsSupportedForTheMethod(supportedStatus,statusCode);
-
-            if(status.equals(Status.NOCONTENT)){
-                return Response.status(statusCode).type(mediaTypeToProduce).build();
-            }else if(status.equals(Status.CREATED)){
-                return Response.status(statusCode).entity(cont.process(dynamicRequest)).type(mediaTypeToProduce).build();
-            }
-
-            return Response.status(statusCode).type(mediaTypeToProduce).build();
-
-        }catch (Exception exp) {
-
-            return constructErrorResponse(exp,mediaTypeToProduce);
-
-        }finally
-        {
-            metricsRecorder.stopTimerContext();
-        }
-    }*/
-
-    /*
-    The function process DELETE request.
-    Param status in this method determines what kind of response to return.
-    As per RFC ref https://tools.ietf.org/html/rfc2616#section-9.6 It only supports NOCONTENT, ACCEPTED and OK
-    If any other status is listed then it will return OK. In case of error BAD REQUEST and INTERNAL SERVICE ERROR
-    with appropriate error message will return
-     */
-    /*private Response processDELETERequest(final Class controller,
-                                       final metrics.Metrics metricsRecorder,
-                                       final ContainerRequestContext containerRequestContext,
-                                       String mediaTypeToProduce, String status) throws IllegalAccessException, InstantiationException{
-        final IDynamicResourceControllerDELETE cont = (IDynamicResourceControllerDELETE) controller.newInstance();
-        final MultivaluedMap<String, String> pathParams = containerRequestContext.getUriInfo().getPathParameters();
-        try {
-
-            final DynamicRequest dynamicRequest = new DynamicRequest(containerRequestContext,pathParams);
-            metricsRecorder.startTimerContext();
-
-            Integer statusCode = getStatusCode(status);
-
-            List<Status> supportedStatus = getSupportedStatusListForDELETEMethod();
-            verifyStatusIsSupportedForTheMethod(supportedStatus,statusCode);
-
-            if(status.equals(Status.NOCONTENT)){
-                return Response.status(statusCode).type(mediaTypeToProduce).build();
-            }else if(status.equals(Status.ACCEPTED)){
-                return Response.status(statusCode).entity(cont.process(dynamicRequest)).type(mediaTypeToProduce).build();
-            }
-
-            return Response.status(statusCode).type(mediaTypeToProduce).build();
-
-        }catch (Exception exp) {
-
-            return constructErrorResponse(exp,mediaTypeToProduce);
-
-        }finally
-        {
-            metricsRecorder.stopTimerContext();
-        }
-    }*/
-
-
-
-
-    /*private int getStatusCode(String status){
-        Integer statusCode = Status.OK.getStatus();
-        if(StringUtils.isNotEmpty(status)){
-            statusCode = Status.getStatusCode(status);
-            if(statusCode == null) {
-                try {
-                    statusCode = Status.valueOf(status).getStatus();
-                }catch (Exception exp){ //Exception shouldn't happen as status should have been verified and only valid status should come by this time ! But we will log error in case and that will be a bug to fix !
-                    logger.error(String.format("Panic: Bug, invalid status %s , failed to find corresponding status code ! returning status OK (200)",status));
-                }
-            }
-        }
-        return statusCode;
-    }*/
-
-    /*private final List<Status> getSupportedStatusListForPUTMethod(){
-        List<Status> supportedStatusList = new ArrayList<>();
-        supportedStatusList.add(Status.OK);
-        supportedStatusList.add(Status.NOCONTENT);
-        supportedStatusList.add(Status.CREATED);
-        return supportedStatusList;
-    }*/
-
-    /*private final List<Status> getSupportedStatusListForDELETEMethod(){
-        List<Status> supportedStatusList = new ArrayList<>();
-        supportedStatusList.add(Status.OK);
-        supportedStatusList.add(Status.NOCONTENT);
-        supportedStatusList.add(Status.ACCEPTED);
-        return supportedStatusList;
-    }*/
-
-    /*private void verifyStatusIsSupportedForTheMethod(List<Status> supportedStatusList,Integer statusCode){
-        //We will log error if status code is not supported
-        if(!supportedStatusList.stream().anyMatch(p->p.getStatus()==statusCode)){
-            logger.error(String.format("Panic: Status code %s is not supported hence status OK will be returned. Please verify status code is supported for PUT method !"));
-        }
-    }*/
-
-
 
 }
