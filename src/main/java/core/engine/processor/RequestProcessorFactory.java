@@ -19,23 +19,23 @@ public class RequestProcessorFactory {
 
         RequestProcessor requestProcessor = null;
 
-        if (method.equalsIgnoreCase(Method.GET.getMethodName())) {
+        if (method.equals(Method.GET.getMethodName())) {
 
             requestProcessor = new GetRequestProcessor(controller,metricsRecorder,containerRequestContext,mediaTypeToProduce, status);
 
-        } else if (method.equalsIgnoreCase(Method.POST.getMethodName())){
+        } else if (method.equals(Method.POST.getMethodName())){
 
             requestProcessor = new PostRequestProcessor(controller,metricsRecorder,containerRequestContext,mediaTypeToProduce,status);
 
-        }else if (method.equalsIgnoreCase(Method.PUT.getMethodName())){
+        }else if (method.equals(Method.PUT.getMethodName())){
 
             requestProcessor = new PutRequestProcessor(controller,metricsRecorder,containerRequestContext,mediaTypeToProduce,status);
 
-        }else if (method.equalsIgnoreCase(Method.DELETE.getMethodName())){
+        }else if (method.equals(Method.DELETE.getMethodName())){
 
             requestProcessor = new DeleteRequestProcessor(controller,metricsRecorder,containerRequestContext,mediaTypeToProduce,status);
 
-        }else if (method.equalsIgnoreCase(Method.PATCH.getMethodName())){
+        }else if (method.equals(Method.PATCH.getMethodName())){
             throw new NotImplementedException();
         }else{
             throw new RuntimeException("Panic: Unknown method");

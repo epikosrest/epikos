@@ -26,7 +26,7 @@ public class PostRequestFilter implements ContainerRequestFilter {
 
         ContentEncoder encoder = new org.glassfish.jersey.message.GZipEncoder();
         List<String> contentEncoding = requestContext.getHeaders().get("content-encoding");
-        if (!requestContext.getMethod().equalsIgnoreCase(GET) && contentEncoding != null && contentEncoding.stream().anyMatch(encode->encode.equalsIgnoreCase(ENCODING_TYPE.GZIP_ENCODING))){
+        if (!requestContext.getMethod().equalsIgnoreCase(GET) && contentEncoding != null && contentEncoding.stream().anyMatch(encode->encode.equals(ENCODING_TYPE.GZIP_ENCODING))){
             requestContext.setEntityStream(encoder.decode(ENCODING_TYPE.GZIP_ENCODING, requestContext.getEntityStream()));
         }
         //ToDo: implement security feature

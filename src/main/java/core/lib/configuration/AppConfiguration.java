@@ -26,33 +26,35 @@ import java.util.*;
 
 public class AppConfiguration implements IAppConfiguration {
 
-	static final Logger logger = LoggerFactory.getLogger(AppConfiguration.class);
+	final static Logger logger = LoggerFactory.getLogger(AppConfiguration.class);
 
 	public static final AppConfiguration getAppConfiguration = new AppConfiguration();
 	
 	Properties properties = null;
 	StringBuilder errorMessage = new StringBuilder();
+
+	//static Configuration appConfiguration = new Configuration();
 	
 	private AppConfiguration() {
 	try {
 			loadConfiguration();
 			loadConfigurationKeyValue(properties);
 		} catch (IOException ioExp) {
-
-			String errorMsg = String.format("Following exception occured while loading configuraiton file, please fix it !",ioExp.getMessage());
 			errorMessage
-					.append(errorMsg);
-			logger.error(errorMsg);
+					.append("Following exception occured while loading configuraiton file, please fix it !\n"
+							+ ioExp.getMessage());
 		}
 	}
 
+	/*public static AppConfiguration getConfiguration(Configuration config) {
+		//configConsumerList.add(config);
+		return configuration;
+	}*/
 
-    @Override
 	public String getErrorMessage() {
 		return errorMessage.toString();
 	}
 
-    @Override
 	public Properties getProperties() {
 		return properties;
 	}
@@ -62,12 +64,17 @@ public class AppConfiguration implements IAppConfiguration {
 		// We will first get full path of configuration file e.g.
 		String configFileFullPath = Utility.getConfigFileFullPath();
 		File configFile = new File(configFileFullPath);
-		//InputStream configFileInputStream = null;
-		try (InputStream configFileInputStream = new FileInputStream(configFile)){
+		InputStream configFileInputStream = null;
+		try {
+			configFileInputStream = new FileInputStream(configFile);
 			properties = new Properties();
 			properties.load(configFileInputStream);
-
-        }
+			
+		} finally {
+			if (configFileInputStream != null) {
+				configFileInputStream.close();
+			}
+		}
 	}
 
 	private void loadConfigurationKeyValue(Properties properties) {

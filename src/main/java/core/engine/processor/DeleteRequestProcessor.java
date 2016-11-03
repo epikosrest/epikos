@@ -45,9 +45,9 @@ public class DeleteRequestProcessor extends RequestProcessor{
             List<Status> supportedStatus = getSupportedStatusListForDELETEMethod();
             verifyStatusIsSupportedForTheMethod(supportedStatus,statusCode);
 
-            if(status.equals(Status.NOCONTENT.name())){
+            if(status.equals(Status.NOCONTENT)){
                 return Response.status(statusCode).type(mediaTypeToProduce).build();
-            }else if(status.equals(Status.ACCEPTED.name())){
+            }else if(status.equals(Status.ACCEPTED)){
                 return Response.status(statusCode).entity(cont.process(dynamicRequest)).type(mediaTypeToProduce).build();
             }
 

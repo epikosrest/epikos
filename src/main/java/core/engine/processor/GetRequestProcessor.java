@@ -16,7 +16,7 @@ import javax.ws.rs.core.Response;
  */
 public class GetRequestProcessor extends RequestProcessor {
 
-    static final Logger loggerGetRequest = LoggerFactory.getLogger(GetRequestProcessor.class);
+    final static Logger logger = LoggerFactory.getLogger(GetRequestProcessor.class);
 
     public GetRequestProcessor(Class controller,
                                Metrics metricsRecorder,
@@ -36,8 +36,8 @@ public class GetRequestProcessor extends RequestProcessor {
             Object response = cont.process(dynamicRequest);
             if(response instanceof Response){
                 Response respToReturn = (Response)response;
-                if(!mediaTypeToProduce.equalsIgnoreCase(respToReturn.getMediaType().toString())){
-                    loggerGetRequest.warn(String.format("Panic : media type to produce is mismatching ! Expected to produce %s but returned %s",mediaTypeToProduce,respToReturn.getMediaType()));
+                if(!mediaTypeToProduce.toLowerCase().equals(respToReturn.getMediaType().toString().toLowerCase())){
+                    logger.warn(String.format("Panic : media type to produce is mismatching ! Expected to produce %s but returned %s",mediaTypeToProduce,respToReturn.getMediaType()));
                 }
 
                 return respToReturn;
