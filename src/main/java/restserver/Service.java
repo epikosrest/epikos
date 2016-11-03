@@ -136,7 +136,7 @@ public class Service implements IService{
             bannerText = new String(Files.readAllBytes(Paths.get(resourceBannerFullPath)));
             logger.info("\n" + bannerText + "\n");
 
-            }catch (Exception exp){
+            }catch (IOException exp){
 			//We don't care if it failed !
 		}
     }

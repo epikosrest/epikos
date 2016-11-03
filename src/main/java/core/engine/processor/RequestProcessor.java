@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import core.domain.enums.Status;
 import core.error.EpikosError;
 
+import core.exception.EpikosException;
 import metrics.Metrics;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -39,7 +40,7 @@ public abstract class RequestProcessor {
 
     }
 
-    public abstract Response process() throws IllegalAccessException, InstantiationException;
+    public abstract Response process() throws IllegalAccessException, InstantiationException,EpikosException;
 
     protected void verifyStatusIsSupportedForTheMethod(List<Status> supportedStatusList, Integer statusCode){
         //We will log error if status code is not supported

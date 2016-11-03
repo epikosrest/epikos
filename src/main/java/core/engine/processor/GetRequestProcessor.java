@@ -2,6 +2,7 @@ package core.engine.processor;
 
 import core.dynamic.resources.domain.DynamicRequest;
 import core.dynamic.resources.domain.IDynamicResourceControllerGet;
+import core.exception.EpikosException;
 import metrics.Metrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +26,7 @@ public class GetRequestProcessor extends RequestProcessor {
     }
 
     @Override
-    public Response process() throws IllegalAccessException, InstantiationException{
+    public Response process() throws IllegalAccessException, InstantiationException,EpikosException {
         final IDynamicResourceControllerGet cont = (IDynamicResourceControllerGet) controller.newInstance();
         final MultivaluedMap<String, String> pathParams = containerRequestContext.getUriInfo().getPathParameters();
         try {
