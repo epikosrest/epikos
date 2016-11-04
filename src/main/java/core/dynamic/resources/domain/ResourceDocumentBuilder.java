@@ -33,31 +33,31 @@ public class ResourceDocumentBuilder {
         }
 
 
-        resourceDocument.append(docFooter);
+
 
     }
 
     private void addResourceValidInformation(Resource resource,String serviceURI){
 
-        resourceDocument.append("<tr><td bgcolor=\"#0A5F07\">");
+        resourceDocument.append("<tr><td bgcolor=\"#8296AC\">");
         resourceDocument.append(serviceURI + resource.getPath());
-        resourceDocument.append("</td><td bgcolor=\"#0A5F07\">");
+        resourceDocument.append("</td><td bgcolor=\"#8296AC\">");
         resourceDocument.append(resource.getResourceMethods().get(0).getHttpMethod());
-        resourceDocument.append("</td><td bgcolor=\"#0A5F07\">");
+        resourceDocument.append("</td><td bgcolor=\"#8296AC\">");
         resourceDocument.append(resource.getResourceMethods().get(0).getConsumedTypes().get(0).toString());
-        resourceDocument.append("</td><td bgcolor=\"#0A5F07\">");
+        resourceDocument.append("</td><td bgcolor=\"#8296AC\">");
         resourceDocument.append(resource.getResourceMethods().get(0).getProducedTypes().get(0).toString());
         resourceDocument.append("</td></tr>");
     }
 
     public void addResourceInvalidInformation(String invalidInfo){
-        resourceInvalidApiDocument.append("<tr><td colspan=\"4\" bgcolor=\"#0A5F07\">");
+        resourceInvalidApiDocument.append("<tr><td colspan=\"4\" bgcolor=\"#B68174\">");
         resourceInvalidApiDocument.append(invalidInfo);
         resourceInvalidApiDocument.append("</td></tr>");
     }
 
     public void updateResourceInvalidInformation(String invalidInfo){
-        resourceInvalidApiDocument.append("</br><tr><td colspan=\"4\" bgcolor=\"#0A5F07\">");
+        resourceInvalidApiDocument.append("</br><tr><td colspan=\"4\" bgcolor=\"#B68174\">");
         resourceInvalidApiDocument.append("<b>" + invalidInfo + "</b>");
         resourceInvalidApiDocument.append("</td></tr>");
     }
@@ -65,7 +65,7 @@ public class ResourceDocumentBuilder {
     public void addResourceDocInvalidInfo(String invalidInfo){
         resourceDocument.append(docHeader);
 
-        resourceDocument.append("<tr><td colspan=\"4\" bgcolor=\"#0A5F07\">");
+        resourceDocument.append("<tr><td colspan=\"4\" bgcolor=\"#B68174\">");
         resourceDocument.append(invalidInfo);
         resourceDocument.append("</td></tr>");
 
@@ -74,7 +74,10 @@ public class ResourceDocumentBuilder {
     }
 
     public String getResourceDocument() {
-        return resourceDocument.toString();
+        if(resourceInvalidApiDocument.length()>0){
+            return resourceDocument.toString() + resourceInvalidApiDocument.toString() + docFooter;
+        }
+        return resourceDocument.toString() +docFooter;
     }
 
 }

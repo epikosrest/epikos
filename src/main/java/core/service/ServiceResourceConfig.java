@@ -91,7 +91,7 @@ public  class ServiceResourceConfig extends ResourceConfig {
             buildAndRegisterInvalidDocInfo("The dynamic resource api list file is not available. Please check the value dynamic.resource.configuration in Application.configuration file and make sure the file exist !\n" + ioExp.getMessage());
 
         }catch (ParserException parserExp){
-            buildAndRegisterInvalidDocInfo("The dynamic resource api list is an invalid yaml file. Please check the api list and fix following issue \n" + parserExp.getMessage());
+            buildAndRegisterInvalidDocInfo("The dynamic resource api list is an invalid yml file. Please check the api list and fix following issue \n" + parserExp.getMessage());
         }
 
         register(com.wordnik.swagger.jersey.listing.ApiListingResourceJSON.class);
@@ -301,7 +301,12 @@ public  class ServiceResourceConfig extends ResourceConfig {
     private boolean validateDynamicResource(Api api ,ResourceDocumentBuilder resourceDocumentBuilder){
 
         if(isExceptionalCase(api)){
+            if(!isValidMethod(api.getMethod())) {
+                buildInvalidInformation(api,resourceDocumentBuilder);
+                return false;
+            }
             return true;
+
         }
 
         //Othewise validate if any one of component (request,response and controller) present and is valid
@@ -331,7 +336,7 @@ public  class ServiceResourceConfig extends ResourceConfig {
             }
         }
 
-        if(StringUtils.isEmpty(api.getStatus()) || StringUtils.isBlank(api.getStatus()) || !isValidStatusCode(api.getStatus())){
+        if(!isValidStatusCode(api.getStatus())){
 
             buildInvalidInformation(api, resourceDocumentBuilder);
             resourceFound = false;
@@ -341,6 +346,10 @@ public  class ServiceResourceConfig extends ResourceConfig {
     }
 
     private boolean isValidStatusCode(String status){
+        if(StringUtils.isEmpty(status) || StringUtils.isBlank(status)){
+            return false;
+        }
+
         Integer statusCode = Status.getStatusCode(status);
         if(statusCode == null){
             try {
@@ -494,190 +503,14 @@ public  class ServiceResourceConfig extends ResourceConfig {
         return moxyJsonConfig.resolver();
     }
 
-    /*private Response processGETRequest(final Class controller,
-                                       final metrics.Metrics metricsRecorder,
-                                   final ContainerRequestContext containerRequestContext,
-                                   String mediaTypeToProduce) throws IllegalAccessException, InstantiationException{
-        final IDynamicResourceControllerGet cont = (IDynamicResourceControllerGet) controller.newInstance();
-        final MultivaluedMap<String, String> pathParams = containerRequestContext.getUriInfo().getPathParameters();
-        try {
-
-            final DynamicRequest dynamicRequest = new DynamicRequest(containerRequestContext,pathParams);
-            metricsRecorder.startTimerContext();
-            Object response = cont.process(dynamicRequest);
-            if(response instanceof Response){
-                Response respToReturn = (Response)response;
-                if(!mediaTypeToProduce.toLowerCase().equals(respToReturn.getMediaType().toString().toLowerCase())){
-                   logger.warn(String.format("Panic : media type to produce is missmatching ! Expected to produce %s but returned %s",mediaTypeToProduce,respToReturn.getMediaType()));
-                }
-
-                //respToReturn.getStatusInfo()
-                return respToReturn;
-            }
-
-            return Response.ok().entity(response).type(mediaTypeToProduce).build();
-
-        } finally {
-            metricsRecorder.stopTimerContext();
-        }
-    }*/
-
-    /*private Response processPOSTRequest(final Class controller,
-                                        final metrics.Metrics metricsRecorder,
-                                        final ContainerRequestContext containerRequestContext,
-                                        String mediaTypeToProduce,String status) throws Exception{
-        final IDynamicResourceControllerPOST cont = (IDynamicResourceControllerPOST) controller.newInstance();
-        final MultivaluedMap<String, String> pathParams = containerRequestContext.getUriInfo().getPathParameters();
-
-        try {
-
-            final DynamicRequest dynamicRequest = new DynamicRequest(containerRequestContext,pathParams);
-            metricsRecorder.startTimerContext();
-
-            Integer statusCode = getStatusCode(status);
-
-            List<Status> supportedStatus = getSupportedStatusListForPOSTMethod();
-            verifyStatusIsSupportedForTheMethod(supportedStatus,statusCode);
-
-            if(status.equals(Status.NOCONTENT)){
-                return Response.status(statusCode).type(mediaTypeToProduce).build();
-            }else if(status.equals(Status.CREATED)){
-                return Response.status(statusCode).entity(cont.process(dynamicRequest)).type(mediaTypeToProduce).location(containerRequestContext.getUriInfo().getAbsolutePath()).build();
-            }
-
-            return Response.status(statusCode).type(mediaTypeToProduce).build();
-
-        }catch (Exception exp){
-            return constructErrorResponse(exp,mediaTypeToProduce);
-        }
-        finally {
-            metricsRecorder.stopTimerContext();
-        }
-    }*/
-
-    /*
-    The function process PUT request.
-    Param status in this method determines what kind of response to return.
-    As per RFC ref https://tools.ietf.org/html/rfc2616#section-9.6 It only supports NOCONTENT, CREATED and OK
-    If any other status is listed then it will return OK. In case of error BAD REQUEST and INTERNAL SERVICE ERROR
-    with appropriate error message will return
-     */
-    /*private Response processPUTRequest(final Class controller,
-                                       final metrics.Metrics metricsRecorder,
-                                       final ContainerRequestContext containerRequestContext,
-                                       String mediaTypeToProduce, String status) throws IllegalAccessException, InstantiationException{
-        final IDynamicResourceControllerPUT cont = (IDynamicResourceControllerPUT) controller.newInstance();
-        final MultivaluedMap<String, String> pathParams = containerRequestContext.getUriInfo().getPathParameters();
-
-        try {
-
-            final DynamicRequest dynamicRequest = new DynamicRequest(containerRequestContext,pathParams);
-            metricsRecorder.startTimerContext();
-
-            Integer statusCode = Status.getStatusCode(status);
-
-            List<Status> supportedStatus = getSupportedStatusListForPUTMethod();
-            verifyStatusIsSupportedForTheMethod(supportedStatus,statusCode);
-
-            if(status.equals(Status.NOCONTENT)){
-                return Response.status(statusCode).type(mediaTypeToProduce).build();
-            }else if(status.equals(Status.CREATED)){
-                return Response.status(statusCode).entity(cont.process(dynamicRequest)).type(mediaTypeToProduce).build();
-            }
-
-            return Response.status(statusCode).type(mediaTypeToProduce).build();
-
-        }catch (Exception exp) {
-
-            return constructErrorResponse(exp,mediaTypeToProduce);
-
-        }finally
-        {
-            metricsRecorder.stopTimerContext();
-        }
-    }*/
-
-    /*
-    The function process DELETE request.
-    Param status in this method determines what kind of response to return.
-    As per RFC ref https://tools.ietf.org/html/rfc2616#section-9.6 It only supports NOCONTENT, ACCEPTED and OK
-    If any other status is listed then it will return OK. In case of error BAD REQUEST and INTERNAL SERVICE ERROR
-    with appropriate error message will return
-     */
-    /*private Response processDELETERequest(final Class controller,
-                                       final metrics.Metrics metricsRecorder,
-                                       final ContainerRequestContext containerRequestContext,
-                                       String mediaTypeToProduce, String status) throws IllegalAccessException, InstantiationException{
-        final IDynamicResourceControllerDELETE cont = (IDynamicResourceControllerDELETE) controller.newInstance();
-        final MultivaluedMap<String, String> pathParams = containerRequestContext.getUriInfo().getPathParameters();
-        try {
-
-            final DynamicRequest dynamicRequest = new DynamicRequest(containerRequestContext,pathParams);
-            metricsRecorder.startTimerContext();
-
-            Integer statusCode = getStatusCode(status);
-
-            List<Status> supportedStatus = getSupportedStatusListForDELETEMethod();
-            verifyStatusIsSupportedForTheMethod(supportedStatus,statusCode);
-
-            if(status.equals(Status.NOCONTENT)){
-                return Response.status(statusCode).type(mediaTypeToProduce).build();
-            }else if(status.equals(Status.ACCEPTED)){
-                return Response.status(statusCode).entity(cont.process(dynamicRequest)).type(mediaTypeToProduce).build();
-            }
-
-            return Response.status(statusCode).type(mediaTypeToProduce).build();
-
-        }catch (Exception exp) {
-
-            return constructErrorResponse(exp,mediaTypeToProduce);
-
-        }finally
-        {
-            metricsRecorder.stopTimerContext();
-        }
-    }*/
-
-
-
-
-    /*private int getStatusCode(String status){
-        Integer statusCode = Status.OK.getStatus();
-        if(StringUtils.isNotEmpty(status)){
-            statusCode = Status.getStatusCode(status);
-            if(statusCode == null) {
-                try {
-                    statusCode = Status.valueOf(status).getStatus();
-                }catch (Exception exp){ //Exception shouldn't happen as status should have been verified and only valid status should come by this time ! But we will log error in case and that will be a bug to fix !
-                    logger.error(String.format("Panic: Bug, invalid status %s , failed to find corresponding status code ! returning status OK (200)",status));
-                }
+    private boolean isValidMethod(String method){
+        for(Method m : Method.values()){
+            if(method.equalsIgnoreCase(m.name())){
+                return true;
             }
         }
-        return statusCode;
-    }*/
-
-    /*private final List<Status> getSupportedStatusListForPUTMethod(){
-        List<Status> supportedStatusList = new ArrayList<>();
-        supportedStatusList.add(Status.OK);
-        supportedStatusList.add(Status.NOCONTENT);
-        supportedStatusList.add(Status.CREATED);
-        return supportedStatusList;
-    }*/
-
-    /*private final List<Status> getSupportedStatusListForDELETEMethod(){
-        List<Status> supportedStatusList = new ArrayList<>();
-        supportedStatusList.add(Status.OK);
-        supportedStatusList.add(Status.NOCONTENT);
-        supportedStatusList.add(Status.ACCEPTED);
-        return supportedStatusList;
-    }*/
-
-    /*private void verifyStatusIsSupportedForTheMethod(List<Status> supportedStatusList,Integer statusCode){
-        //We will log error if status code is not supported
-        if(!supportedStatusList.stream().anyMatch(p->p.getStatus()==statusCode)){
-            logger.error(String.format("Panic: Status code %s is not supported hence status OK will be returned. Please verify status code is supported for PUT method !"));
-        }
-    }*/
+        return false;
+    }
 
 
 

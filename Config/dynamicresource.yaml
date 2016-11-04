@@ -9,7 +9,7 @@ apiList:
    - consume: application/json
      produce: text/html
      path: test/hello
-     method: POST
+     method: POSTs
      response: spoof/test_response.json
 #   - consume: application/json
 #     produce: application/json
