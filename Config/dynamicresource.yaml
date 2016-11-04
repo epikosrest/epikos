@@ -4,7 +4,7 @@ apiList:
    - consume: application/json
      produce: text/html
      path: test/{testid}/hello
-     method: GET
+#     method: GET
      response: spoof/test_response.json
    - consume: application/json
      produce: text/html

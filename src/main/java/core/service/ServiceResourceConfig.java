@@ -504,6 +504,9 @@ public  class ServiceResourceConfig extends ResourceConfig {
     }
 
     private boolean isValidMethod(String method){
+        if(StringUtils.isEmpty(method) || StringUtils.isBlank(method)){
+            return false;
+        }
         for(Method m : Method.values()){
             if(method.equalsIgnoreCase(m.name())){
                 return true;
