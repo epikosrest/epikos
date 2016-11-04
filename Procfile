@@ -1,1 +1,1 @@
-web: java -jar --port $PORT target/EpikosRestService-0.0.3-jar-with-dependencies.jar
+web: java -jar -Dhttp.port=8080 target/EpikosRestService-0.0.3-jar-with-dependencies.jar
