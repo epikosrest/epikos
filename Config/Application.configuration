@@ -8,4 +8,4 @@ port=8080
 #resource.package.name=restresources;testpackage
 
 #indicates yaml file to use to find dynamic resources i.e. api list
-dynamic.resource.configuration=dynamicresource.yaml
+dynamic.resource.configuration=dynamicresource.yml

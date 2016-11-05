@@ -3,13 +3,13 @@
 apiList:
    - consume: application/json
      produce: text/html
-     path: test/{testid}/hello
-#     method: GET
+#     path: test/{testid}/hello
+     method: GET
      response: spoof/test_response.json
    - consume: application/json
      produce: text/html
      path: test/hello
-     method: POSTs
+     method: POST
      response: spoof/test_response.json
 #   - consume: application/json
 #     produce: application/json

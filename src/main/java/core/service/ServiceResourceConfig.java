@@ -301,7 +301,7 @@ public  class ServiceResourceConfig extends ResourceConfig {
     private boolean validateDynamicResource(Api api ,ResourceDocumentBuilder resourceDocumentBuilder){
 
         if(isExceptionalCase(api)){
-            if(!isValidMethod(api.getMethod())) {
+            if(!isValidMethod(api.getMethod()) || !isValidPath(api.getPath())) {
                 buildInvalidInformation(api,resourceDocumentBuilder);
                 return false;
             }
@@ -336,7 +336,7 @@ public  class ServiceResourceConfig extends ResourceConfig {
             }
         }
 
-        if(!isValidStatusCode(api.getStatus())){
+        if(!isValidStatusCode(api.getStatus()) || !isValidMethod(api.getMethod()) || !isValidPath(api.getPath())){
 
             buildInvalidInformation(api, resourceDocumentBuilder);
             resourceFound = false;
@@ -389,12 +389,18 @@ public  class ServiceResourceConfig extends ResourceConfig {
 
     private void buildInvalidInformation(Api api ,ResourceDocumentBuilder resouceDocumentBuilder){
 
-        resouceDocumentBuilder.addResourceInvalidInformation(String.format("Failed to create resource %s , supported verb: %s , consumed media type %s, produce media type %s , status code %s",
-                api.getPath(),
-                api.getMethod(),
-                api.getConsume(),
-                api.getProduce(),
-                api.getStatus()));
+        String path = (StringUtils.isEmpty(api.getPath()) || StringUtils.isBlank(api.getPath()))?"(path has not defined)":api.getPath();
+        String method = (StringUtils.isEmpty(api.getMethod()) || StringUtils.isBlank(api.getMethod()))?"(method has not defined)":api.getMethod();
+        String consume = (StringUtils.isEmpty(api.getConsume()) || StringUtils.isBlank(api.getConsume()))?"(consume content type has not defined)":api.getConsume();
+        String produce = (StringUtils.isEmpty(api.getProduce()) || StringUtils.isBlank(api.getProduce()))?"(produce content type has not defined)":api.getProduce();
+        String status = (StringUtils.isEmpty(api.getStatus()) || StringUtils.isBlank(api.getStatus()))?"(status content type has not defined)":api.getStatus();
+
+        resouceDocumentBuilder.addResourceInvalidInformation(String.format("Failed to create resource path: %s , supported verb: %s , consumed media type: %s, produce media type: %s , status code: %s",
+                path,
+                method,
+                consume,
+                produce,
+                status));
     }
 
     private boolean resourceClassExist(String className, String resourceType, ResourceDocumentBuilder resouceDocumentBuilder){
@@ -515,6 +521,12 @@ public  class ServiceResourceConfig extends ResourceConfig {
         return false;
     }
 
+    private boolean isValidPath(String path){
+        if(StringUtils.isEmpty(path) || StringUtils.isBlank(path)){
+            return false;
+        }
+        return true;
+    }
 
 
 }
