@@ -38,6 +38,7 @@ import core.filter.PostRequestFilter;
 import core.filter.PreRequestFilter;
 import core.intereceptor.RequestReaderIntereceptor;
 import core.intereceptor.ResponseWriterInterceptor;
+import core.service.handler.RequestHandler;
 import core.spoof.Spoof;
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.moxy.json.MoxyJsonConfig;
@@ -148,73 +149,9 @@ public  class ServiceResourceConfig extends ResourceConfig {
         final ResourceMethod.Builder methodBuilder = resourceBuilder.addMethod(drmetaData.getMethod());
         methodBuilder.consumes(drmetaData.getConsume());
 
-
+        final RequestHandler requestHandler = new RequestHandler(drmetaData);
         methodBuilder.produces(drmetaData.getProduce())
-                .handledBy(new Inflector<ContainerRequestContext, Response>() {
-
-                    @Override
-                    public Response apply(ContainerRequestContext containerRequestContext) {
-
-                        metrics.Metrics metricsRecorder = null;
-                        Response response = Response.ok().build();
-                        RequestProcessor requestProcessor = null;
-
-                        try {
-
-                            final Class controller = drmetaData.getController() == null ? null : Class.forName(drmetaData.getController());
-                            metricsRecorder = controller == null ? drmetaData.getServiceMode() == ServiceMode.SPOOF ? new metrics.Metrics(Spoof.class) :null: new metrics.Metrics(controller);
-
-
-
-                            if (metricsRecorder != null) {
-                                metricsRecorder.updateRequestMetrics(containerRequestContext.getEntityStream().toString().length(), containerRequestContext.getUriInfo().getPath());
-                            }
-                            //Check request,response and controller configuration exist and hook it appropriately
-                            if (controller != null) {
-
-                                response = RequestProcessorFactory.buildRequestProcessor(containerRequestContext.getRequest().getMethod(),
-                                        controller,metricsRecorder,containerRequestContext,drmetaData.getProduce(),drmetaData.getStatus()).process();
-
-                            } else {
-                                //ToDo: add logic to construct processing request without controller. In this case either response or request and response must be provided
-
-                                //ToDo: currently responseSpoof property is only being used by Api builder resource to display Api doc
-                                //Need to identify good way to handle this  and get rid of responseData property !
-                                try {
-                                    if (metricsRecorder != null)
-                                        metricsRecorder.startTimerContext();
-                                    if(drmetaData.getServiceMode() == ServiceMode.SPOOF){
-                                        requestProcessor = new SpoofRequestProcessor(metricsRecorder,drmetaData.getProduce(),drmetaData.getResponseSpoof(),drmetaData.getStatus());
-                                        response = requestProcessor.process(); //Response.ok().entity(drmetaData.getResponseSpoof()).type(drmetaData.getProduce()).build();
-                                    }else {
-                                        response = Response.ok().entity(drmetaData.getResponse()).type(drmetaData.getProduce()).build();
-                                    }
-                                } finally {
-                                    if (metricsRecorder != null) {
-                                        metricsRecorder.updateResponseMetrics(response.getEntity().toString().length(), containerRequestContext.getUriInfo().getPath());
-                                        metricsRecorder.stopTimerContext();
-                                        metricsRecorder = null;
-                                    }
-                                }
-                            }
-
-                        } catch(Exception exp){
-                            logger.info("Exception " + exp.getMessage());
-                            EpikosError error = new EpikosError();
-                            error.setMessage(exp.getMessage());
-                            error.setId(Status.INTERNALSERVERERROR.getStatus());
-                            return Response.status(error.getId()).entity(error).type(drmetaData.getProduce()).build();
-                        } finally {
-                            if (metricsRecorder != null) {
-                                metricsRecorder.updateResponseMetrics(response.getEntity().toString().length(), containerRequestContext.getUriInfo().getPath());
-                                metricsRecorder.stopTimerContext();
-                            }
-                            return response;
-                        }
-
-                    }
-
-                });
+                .handledBy(requestHandler);
 
         return resourceBuilder.build();
     }
