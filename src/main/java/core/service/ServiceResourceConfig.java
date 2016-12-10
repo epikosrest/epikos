@@ -27,6 +27,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.MappingJsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
+import com.fasterxml.jackson.databind.util.BeanUtil;
 import com.wordnik.swagger.jaxrs.config.BeanConfig;
 import core.domain.enums.Method;
 import core.domain.enums.ServiceMode;
@@ -38,6 +39,7 @@ import core.filter.PostRequestFilter;
 import core.filter.PreRequestFilter;
 import core.intereceptor.RequestReaderIntereceptor;
 import core.intereceptor.ResponseWriterInterceptor;
+import core.lib.Utility;
 import core.service.handler.RequestHandler;
 import core.spoof.Spoof;
 import org.apache.commons.lang3.StringUtils;
@@ -78,6 +80,7 @@ public  class ServiceResourceConfig extends ResourceConfig {
 
     IServiceMetaData metaData;
     final static Logger logger = LoggerFactory.getLogger(ServiceResourceConfig.class);
+    final String SPOOF_URI = "/spoof";
 
     public ServiceResourceConfig(IServiceMetaData metaData) throws Exception{
         this.metaData = metaData;
@@ -212,6 +215,25 @@ public  class ServiceResourceConfig extends ResourceConfig {
                     resource = scanAndBuildResources(api);
                     validResourceList.add(resource);
                     registerResources(resource);
+                    //We will construct spoof end point for same api
+                    //Will check if the end point created is already a Spoof api or not. If yes then we will not create
+                    //spoof api . Also will check whether spoof response (JSON file) has been provided or not.
+                    // If not then will skip
+                    if(api.getServiceMode() != ServiceMode.SPOOF && Utility.isResourceAJSONObject(api.getResponseSpoof())){
+                        Api spoofApi = new Api();
+                        spoofApi.setConsume(api.getConsume());
+                        spoofApi.setMethod(api.getMethod());
+                        spoofApi.setPath(api.getPath() + SPOOF_URI);
+                        spoofApi.setProduce(api.getProduce());
+                        spoofApi.setRequest(api.getRequest());
+                        spoofApi.setResponse(api.getResponse());
+                        spoofApi.setStatus(api.getStatus());
+
+                        spoofApi.setServiceMode(ServiceMode.SPOOF);
+                        resource = scanAndBuildResources(spoofApi);
+                        validResourceList.add(resource);
+                        registerResources(resource);
+                    }
                 }
             }
             resourceDocumentBuilder.addResourceValidInformation(validResourceList,serviceURI);
@@ -238,7 +260,7 @@ public  class ServiceResourceConfig extends ResourceConfig {
     private boolean validateDynamicResource(Api api ,ResourceDocumentBuilder resourceDocumentBuilder){
 
         if(isExceptionalCase(api)){
-            if(!isValidMethod(api.getMethod()) || !isValidPath(api.getPath())) {
+            if(!Utility.isValidMethod(api.getMethod()) || !Utility.isValidPath(api.getPath())) {
                 buildInvalidInformation(api,resourceDocumentBuilder);
                 return false;
             }
@@ -246,8 +268,8 @@ public  class ServiceResourceConfig extends ResourceConfig {
 
         }
 
-        //Othewise validate if any one of component (request,response and controller) present and is valid
-        boolean resourceFound = (resourceClassExist(api.getController(),
+        //Otherwise validate if any one of component (request,response and controller) present and is valid
+        boolean resourceFound = (Utility.resourceClassExist(api.getController(),
                 IDynamicResourceController.class.getTypeName()+";"+
                         IDynamicResourceControllerGet.class.getTypeName() + ";" +
                         IDynamicResourceControllerPOST.class.getTypeName()
@@ -256,24 +278,24 @@ public  class ServiceResourceConfig extends ResourceConfig {
             buildInvalidInformation(api,resourceDocumentBuilder);
             resourceFound = false;
         }
-        if(api.getRequest() != null && !resourceClassExist(api.getRequest()
+        if(api.getRequest() != null && !Utility.resourceClassExist(api.getRequest()
                 ,"NA",resourceDocumentBuilder)){
-            if(!isResourceASONObject(api.getRequest(),null)) {
+            if(!Utility.isResourceAJSONObject(api.getRequest())) {
 
                 buildInvalidInformation(api, resourceDocumentBuilder);
                 resourceFound = false;
             }
         }
 
-        if(api.getResponse() != null && !resourceClassExist(api.getResponse()
+        if(api.getResponse() != null && !Utility.resourceClassExist(api.getResponse()
                 ,"NA",resourceDocumentBuilder)){
-            if(!isResourceASONObject(api.getResponse(),null)) {
+            if(!Utility.isResourceAJSONObject(api.getResponse())) {
                 buildInvalidInformation(api, resourceDocumentBuilder);
                 resourceFound = false;
             }
         }
 
-        if(!isValidStatusCode(api.getStatus()) || !isValidMethod(api.getMethod()) || !isValidPath(api.getPath())){
+        if(!Utility.isValidStatusCode(api.getStatus()) || !Utility.isValidMethod(api.getMethod()) || !Utility.isValidPath(api.getPath())){
 
             buildInvalidInformation(api, resourceDocumentBuilder);
             resourceFound = false;
@@ -282,23 +304,7 @@ public  class ServiceResourceConfig extends ResourceConfig {
         return resourceFound;
     }
 
-    private boolean isValidStatusCode(String status){
-        if(StringUtils.isEmpty(status) || StringUtils.isBlank(status)){
-            return false;
-        }
 
-        Integer statusCode = Status.getStatusCode(status);
-        if(statusCode == null){
-            try {
-                Status statusToVerify = Status.valueOf(status);
-            }catch (Exception exp){
-                logger.error(exp.getMessage());
-                return false;
-            }
-
-        }
-        return true;
-    }
 
     //This is to validate whether the Api signature qualify for exceptional case or not
     //For example if all three i.e. controller, request and response class are not provided and is empty then we don't care and
@@ -316,7 +322,9 @@ public  class ServiceResourceConfig extends ResourceConfig {
                 ){
             //Will only support JSON
             //ToDo add support for any other format like XML etc
-            if(isResourceASONObject(api.getResponse(),api)) {
+            if(Utility.isResourceAJSONObject(api.getResponse())) {
+                    api.setResponseSpoof(Utility.readFile(api.getResponse()));
+                    api.setServiceMode(ServiceMode.SPOOF);
                 return true;
             }
 
@@ -324,7 +332,7 @@ public  class ServiceResourceConfig extends ResourceConfig {
         return false;
     }
 
-    private void buildInvalidInformation(Api api ,ResourceDocumentBuilder resouceDocumentBuilder){
+    private void buildInvalidInformation(Api api ,ResourceDocumentBuilder resourceDocumentBuilder){
 
         String path = (StringUtils.isEmpty(api.getPath()) || StringUtils.isBlank(api.getPath()))?"(path has not defined)":api.getPath();
         String method = (StringUtils.isEmpty(api.getMethod()) || StringUtils.isBlank(api.getMethod()))?"(method has not defined)":api.getMethod();
@@ -332,7 +340,7 @@ public  class ServiceResourceConfig extends ResourceConfig {
         String produce = (StringUtils.isEmpty(api.getProduce()) || StringUtils.isBlank(api.getProduce()))?"(produce content type has not defined)":api.getProduce();
         String status = (StringUtils.isEmpty(api.getStatus()) || StringUtils.isBlank(api.getStatus()))?"(status content type has not defined)":api.getStatus();
 
-        resouceDocumentBuilder.addResourceInvalidInformation(String.format("Failed to create resource path: %s , supported verb: %s , consumed media type: %s, produce media type: %s , status code: %s",
+        resourceDocumentBuilder.addResourceInvalidInformation(String.format("Failed to create resource path: %s , supported verb: %s , consumed media type: %s, produce media type: %s , status code: %s",
                 path,
                 method,
                 consume,
@@ -340,76 +348,7 @@ public  class ServiceResourceConfig extends ResourceConfig {
                 status));
     }
 
-    private boolean resourceClassExist(String className, String resourceType, ResourceDocumentBuilder resouceDocumentBuilder){
-        Class classToVerify = null;
-        logger.info("Looking for interface " + resourceType);
-        try{
-            if(className == null || className.length()==0){
-                resouceDocumentBuilder.updateResourceInvalidInformation(String.format("Resource class name %s is either empty or not defined !",className));
-                return false;
-            }
-            classToVerify = Class.forName(className);
-            Class[] interfaceImplemented = classToVerify.getInterfaces();
 
-            // will pass the check for the timebeing if resourceType is "NA" but need a better way to handle and implement it !
-            if(resourceType.equals("NA")) {
-                return true;
-            }
-            //Check if the resource class has implemented correct interface i.e. IDynamicController/Get/POST
-            for (Class interfaceImp : interfaceImplemented) {
-                logger.info("Interface : " + interfaceImp.getName());
-
-                if (resourceType.contains(interfaceImp.getName())) {
-                    return true;
-                }
-            }
-            //If not that means the resource doesn't implement the expected interface hence will log invalid information and reutrn false
-            resouceDocumentBuilder.updateResourceInvalidInformation(String.format("Resource class name %s don't implement any one of %s interface hence this resource can not be hooked up while constructing resource ! \nPlease implement at least one of the interface in the controller  !",className,resourceType));
-            return false;
-
-        }catch (ClassNotFoundException cnfExp){
-            resouceDocumentBuilder.updateResourceInvalidInformation(String.format("Resource class name %s doesn't exist !",
-                    className));
-            return false;
-        }
-    }
-
-    private boolean isResourceASONObject(String resourceData,Api api){
-        try {
-            final String fileSeparator = System.getProperty("file.separator");
-            final String baseDir = System.getProperty("user.dir");
-            final String spoofFilePath = baseDir + fileSeparator + resourceData;
-        ObjectMapper mapper = new ObjectMapper();
-        JsonFactory jfactory = new MappingJsonFactory();
-            JsonParser jParser = jfactory.createJsonParser(new File(spoofFilePath));
-            String value = readFile(spoofFilePath);
-            if(api != null){
-                api.setResponseSpoof(value);
-                api.setServiceMode(ServiceMode.SPOOF);
-            }
-            return true;
-        }catch (IOException ioExp){
-            return false;
-        }
-
-    }
-
-    public static String readFile(String filename) {
-        String result = "";
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(filename));
-            StringBuilder sb = new StringBuilder();
-            String line = br.readLine();
-            while (line != null) {
-                sb.append(line);
-                line = br.readLine();
-            }
-            result = sb.toString();
-        } catch(Exception e) {
-            e.printStackTrace();
-        }
-        return result;
-    }
 
     /***
      * Build Api Document
@@ -445,25 +384,5 @@ public  class ServiceResourceConfig extends ResourceConfig {
                         .setNamespaceSeparator(':');
         return moxyJsonConfig.resolver();
     }
-
-    private boolean isValidMethod(String method){
-        if(StringUtils.isEmpty(method) || StringUtils.isBlank(method)){
-            return false;
-        }
-        for(Method m : Method.values()){
-            if(method.equalsIgnoreCase(m.name())){
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean isValidPath(String path){
-        if(StringUtils.isEmpty(path) || StringUtils.isBlank(path)){
-            return false;
-        }
-        return true;
-    }
-
 
 }

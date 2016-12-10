@@ -22,9 +22,23 @@ SOFTWARE.
 
 package core.lib;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.MappingJsonFactory;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import core.domain.enums.Method;
+import core.domain.enums.ServiceMode;
+import core.domain.enums.Status;
+import core.dynamic.resources.domain.Api;
+import core.dynamic.resources.domain.ResourceDocumentBuilder;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Iterator;
@@ -102,5 +116,113 @@ public final class Utility {
 		cal.setTimeInMillis(milliSeconds);
 		SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss:SSS");
 		return formatter.format(cal.getTime());
+	}
+
+	public static String readFile(String filename) {
+		String result = "";
+		final String fileSeparator = System.getProperty("file.separator");
+		final String baseDir = System.getProperty("user.dir");
+		final String spoofFilePath = baseDir + fileSeparator + filename;
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(spoofFilePath));
+			StringBuilder sb = new StringBuilder();
+			String line = br.readLine();
+			while (line != null) {
+				sb.append(line);
+				line = br.readLine();
+			}
+			result = sb.toString();
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+
+	public static boolean isResourceAJSONObject(String resourceData){
+		try {
+			final String fileSeparator = System.getProperty("file.separator");
+			final String baseDir = System.getProperty("user.dir");
+			final String spoofFilePath = baseDir + fileSeparator + resourceData;
+
+			ObjectMapper mapper = new ObjectMapper();
+			JsonFactory jfactory = new MappingJsonFactory();
+			JsonParser jParser = jfactory.createJsonParser(new File(spoofFilePath));
+
+			return true;
+		}catch (IOException ioExp){
+			return false;
+		}
+
+	}
+
+	public static boolean isValidStatusCode(String status){
+		if(StringUtils.isEmpty(status) || StringUtils.isBlank(status)){
+			return false;
+		}
+
+		Integer statusCode = Status.getStatusCode(status);
+		if(statusCode == null){
+			try {
+				Status statusToVerify = Status.valueOf(status);
+			}catch (Exception exp){
+				logger.error(exp.getMessage());
+				return false;
+			}
+
+		}
+		return true;
+	}
+
+	public static boolean isValidMethod(String method){
+		if(StringUtils.isEmpty(method) || StringUtils.isBlank(method)){
+			return false;
+		}
+		for(Method m : Method.values()){
+			if(method.equalsIgnoreCase(m.name())){
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static boolean isValidPath(String path){
+		if(StringUtils.isEmpty(path) || StringUtils.isBlank(path)){
+			return false;
+		}
+		return true;
+	}
+
+	public static boolean resourceClassExist(String className, String resourceType, ResourceDocumentBuilder resouceDocumentBuilder){
+		Class classToVerify = null;
+		logger.info("Looking for interface " + resourceType);
+		try{
+			if(className == null || className.length()==0){
+				resouceDocumentBuilder.updateResourceInvalidInformation(String.format("Resource class name %s is either empty or not defined !",className));
+				return false;
+			}
+			classToVerify = Class.forName(className);
+			Class[] interfaceImplemented = classToVerify.getInterfaces();
+
+			// will pass the check for the timebeing if resourceType is "NA" but need a better way to handle and implement it !
+			if(resourceType.equals("NA")) {
+				return true;
+			}
+			//Check if the resource class has implemented correct interface i.e. IDynamicController/Get/POST
+			for (Class interfaceImp : interfaceImplemented) {
+				logger.info("Interface : " + interfaceImp.getName());
+
+				if (resourceType.contains(interfaceImp.getName())) {
+					return true;
+				}
+			}
+			//If not that means the resource doesn't implement the expected interface hence will log invalid information and reutrn false
+			resouceDocumentBuilder.updateResourceInvalidInformation(String.format("Resource class name %s don't implement any one of %s interface hence this resource can not be hooked up while constructing resource ! \nPlease implement at least one of the interface in the controller  !",className,resourceType));
+			return false;
+
+		}catch (ClassNotFoundException cnfExp){
+			resouceDocumentBuilder.updateResourceInvalidInformation(String.format("Resource class name %s doesn't exist !",
+					className));
+			return false;
+		}
 	}
 }
