@@ -8,6 +8,7 @@ import core.engine.processor.RequestProcessorFactory;
 import core.engine.processor.SpoofRequestProcessor;
 import core.error.EpikosError;
 import core.spoof.Spoof;
+import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.process.Inflector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,7 +67,10 @@ public class RequestHandler implements Inflector<ContainerRequestContext, Respon
                     }
                 } finally {
                     if (metricsRecorder != null) {
-                        metricsRecorder.updateResponseMetrics(response.getEntity().toString().length(), containerRequestContext.getUriInfo().getPath());
+                        //We will avoid metrics update for empty response
+                        if(!(response.getEntity() == null || StringUtils.isEmpty(response.getEntity().toString()))) {
+                            metricsRecorder.updateResponseMetrics(response.getEntity().toString().length(), containerRequestContext.getUriInfo().getPath());
+                        }
                         metricsRecorder.stopTimerContext();
                         metricsRecorder = null;
                     }
@@ -81,7 +85,10 @@ public class RequestHandler implements Inflector<ContainerRequestContext, Respon
             return Response.status(error.getId()).entity(error).type(api.getProduce()).build();
         } finally {
             if (metricsRecorder != null) {
-                metricsRecorder.updateResponseMetrics(response.getEntity().toString().length(), containerRequestContext.getUriInfo().getPath());
+                //We will avoid metrics update for empty response
+                if(!(response.getEntity() == null || StringUtils.isEmpty(response.getEntity().toString()))) {
+                    metricsRecorder.updateResponseMetrics(response.getEntity().toString().length(), containerRequestContext.getUriInfo().getPath());
+                }
                 metricsRecorder.stopTimerContext();
             }
             return response;

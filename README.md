@@ -26,9 +26,10 @@ This is "open" source project written in Java based on Jersey (for rest framewor
 and is based on Maven (Gradle will be supported in future) for build system.
 
 Motivation:
-This Project is puerly for education, sharing knowledge and ideas  and try  new concept in REST API design and implementation.
-This is ongoing and evolving project which will not necessarily provide complete solution instead will be evolving and
-adding new feature and ideas.
+This Project is just for education, sharing knowledge and ideas  and try  new concept in REST API design and implementation.
+The Project try to align REST meta and rule based on RFC (https://tools.ietf.org/html/rfc7231#section-4.3).
+This is ongoing and evolving project which will not necessarily provide complete solution instead will be evolving,
+adding new feature and try new ideas.
 The motivation is to learn and implement dynamic feature provided by Jersey to make rest api design simple and effective. 
 Based on Jersey, the framework try to exploit dynamic feature such as "Programmatic API for Building Resources " 
 ref: https://jersey.java.net/documentation/latest/resource-builder.html .

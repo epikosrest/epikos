@@ -219,7 +219,7 @@ public  class ServiceResourceConfig extends ResourceConfig {
                     //Will check if the end point created is already a Spoof api or not. If yes then we will not create
                     //spoof api . Also will check whether spoof response (JSON file) has been provided or not.
                     // If not then will skip
-                    if(api.getServiceMode() != ServiceMode.SPOOF && Utility.isResourceAJSONObject(api.getResponseSpoof())){
+                    if(api.getServiceMode() != ServiceMode.SPOOF){
                         Api spoofApi = new Api();
                         spoofApi.setConsume(api.getConsume());
                         spoofApi.setMethod(api.getMethod());
@@ -227,6 +227,7 @@ public  class ServiceResourceConfig extends ResourceConfig {
                         spoofApi.setProduce(api.getProduce());
                         spoofApi.setRequest(api.getRequest());
                         spoofApi.setResponse(api.getResponse());
+                        spoofApi.setResponseSpoof(api.getResponseSpoof());
                         spoofApi.setStatus(api.getStatus());
 
                         spoofApi.setServiceMode(ServiceMode.SPOOF);
@@ -299,6 +300,14 @@ public  class ServiceResourceConfig extends ResourceConfig {
 
             buildInvalidInformation(api, resourceDocumentBuilder);
             resourceFound = false;
+        }
+
+        //If it is a valid api then will setup spoof response (if provided in json file form) for the api
+        if(resourceFound){
+            if(Utility.isResourceAJSONObject(api.getResponseSpoof())){
+                api.setResponseSpoof(Utility.readFile(api.getResponseSpoof()));
+            }
+
         }
 
         return resourceFound;
