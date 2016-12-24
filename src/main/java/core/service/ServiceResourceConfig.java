@@ -260,6 +260,13 @@ public  class ServiceResourceConfig extends ResourceConfig {
      */
     private boolean validateDynamicResource(Api api ,ResourceDocumentBuilder resourceDocumentBuilder){
 
+        //Will check some of mandatory attribute for api e.g. status, method and path and make sure all attributes are valid before proceeding for next step
+        if(!Utility.isValidStatusCode(api.getStatus()) || !Utility.isValidMethod(api.getMethod()) || !Utility.isValidPath(api.getPath())){
+
+            buildInvalidInformation(api, resourceDocumentBuilder);
+            return false;
+        }
+
         if(isExceptionalCase(api)){
             if(!Utility.isValidMethod(api.getMethod()) || !Utility.isValidPath(api.getPath())) {
                 buildInvalidInformation(api,resourceDocumentBuilder);
@@ -296,11 +303,6 @@ public  class ServiceResourceConfig extends ResourceConfig {
             }
         }
 
-        if(!Utility.isValidStatusCode(api.getStatus()) || !Utility.isValidMethod(api.getMethod()) || !Utility.isValidPath(api.getPath())){
-
-            buildInvalidInformation(api, resourceDocumentBuilder);
-            resourceFound = false;
-        }
 
         //If it is a valid api then will setup spoof response (if provided in json file form) for the api
         if(resourceFound){

@@ -52,8 +52,9 @@ public  class Metrics {
         numberOfCharactersProcessedFromRequest = com.yammer.metrics.Metrics.newCounter(classToReg, "Total-Request-Byte-Processed");
         numberOfCharacterReturnedInResponse= com.yammer.metrics.Metrics.newCounter(classToReg, "Total-Response-Byte-Processed");
 
-        reqeustMessages = com.yammer.metrics.Metrics.newMeter(classToReg,  "Number-Of-Request-Processed", "Received", TimeUnit.SECONDS);
-        responseMessages = com.yammer.metrics.Metrics.newMeter(classToReg,  "Number-Of-Response-Processed", "Send", TimeUnit.SECONDS);
+        reqeustMessages = com.yammer.metrics.Metrics.newMeter(classToReg,  "Number-Of-Request-Processed", "Received", TimeUnit.MILLISECONDS);
+        responseMessages = com.yammer.metrics.Metrics.newMeter(classToReg,  "Number-Of-Response-Processed", "Send", TimeUnit.MILLISECONDS);
+
 
 
         responseTime = com.yammer.metrics.Metrics.newTimer(classToReg,  "Response-Time");
