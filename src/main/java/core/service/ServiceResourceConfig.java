@@ -261,7 +261,7 @@ public  class ServiceResourceConfig extends ResourceConfig {
     private boolean validateDynamicResource(Api api ,ResourceDocumentBuilder resourceDocumentBuilder){
 
         //Will check some of mandatory attribute for api e.g. status, method and path and make sure all attributes are valid before proceeding for next step
-        if(!Utility.isValidStatusCode(api.getStatus()) || !Utility.isValidMethod(api.getMethod()) || !Utility.isValidPath(api.getPath())){
+        if(!(Utility.isValidStatusCode(api.getStatus()) && Utility.isValidMethod(api.getMethod()) && Utility.isValidPath(api.getPath()))){
 
             buildInvalidInformation(api, resourceDocumentBuilder);
             return false;
