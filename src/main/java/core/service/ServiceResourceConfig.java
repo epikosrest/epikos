@@ -261,10 +261,9 @@ public  class ServiceResourceConfig extends ResourceConfig {
     private boolean validateDynamicResource(Api api ,ResourceDocumentBuilder resourceDocumentBuilder){
 
         //Will check some of mandatory attribute for api e.g. status, method and path and make sure all attributes are valid before proceeding for next step
-        if(!(Utility.isValidStatusCode(api.getStatus()) && Utility.isValidMethod(api.getMethod()) && Utility.isValidPath(api.getPath()))){
-
-            buildInvalidInformation(api, resourceDocumentBuilder);
-            return false;
+        boolean validApi = isValidAPI(api,resourceDocumentBuilder);
+        if(!validApi){
+            return validApi;
         }
 
         if(isExceptionalCase(api)){
@@ -316,6 +315,23 @@ public  class ServiceResourceConfig extends ResourceConfig {
     }
 
 
+    private boolean isValidAPI(Api api,ResourceDocumentBuilder resourceDocumentBuilder){
+        boolean valid = true;
+        if(!(Utility.isValidStatusCode(api.getStatus()))){
+            valid = false;
+
+        }if(Utility.isValidMethod(api.getMethod())){
+            valid = false;
+
+        }if(Utility.isValidPath(api.getPath())){
+            valid = false;
+        }
+
+        if(!valid){
+            buildInvalidInformation(api, resourceDocumentBuilder);
+        }
+        return valid;
+    }
 
     //This is to validate whether the Api signature qualify for exceptional case or not
     //For example if all three i.e. controller, request and response class are not provided and is empty then we don't care and
