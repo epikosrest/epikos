@@ -320,10 +320,10 @@ public  class ServiceResourceConfig extends ResourceConfig {
         if(!(Utility.isValidStatusCode(api.getStatus()))){
             valid = false;
 
-        }if(Utility.isValidMethod(api.getMethod())){
+        }if(valid && !Utility.isValidMethod(api.getMethod())){
             valid = false;
 
-        }if(Utility.isValidPath(api.getPath())){
+        }if(valid && !Utility.isValidPath(api.getPath())){
             valid = false;
         }
 
