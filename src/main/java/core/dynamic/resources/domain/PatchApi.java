@@ -11,6 +11,8 @@ final public class PatchApi extends Api{
     public boolean isValid() {
         return Utility.isValidMethod(getMethod()) &&
                 Utility.isValidPath(getPath()) &&
-                Utility.isValidStatusCode(getStatus());
+                Utility.isValidStatusCode(getStatus()) &&
+                Utility.isValidContentType(getConsume()) &&
+                Utility.isValidContentType(getProduce());
     }
 }
