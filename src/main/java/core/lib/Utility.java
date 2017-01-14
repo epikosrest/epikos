@@ -51,7 +51,7 @@ public final class Utility {
 
 
 	final static String CONFIGURATION_FILE = "config.file.name";
-	final static String CONFIGURATION_FOLDER = "confg.file.location";
+	final static String CONFIGURATION_FOLDER = "config.file.location";
 	final static String DEFAULT_CONFIGURATION_FOLDER_NAME = "Config";
 	static String configFileName;
 	static String configFolder;
@@ -192,6 +192,21 @@ public final class Utility {
 		return true;
 	}
 
+	/*
+	This method validate consume and produce filed of api. It can be either application/json or application/xml
+	 */
+	public static boolean isValidContentType(String contentType){
+
+		boolean valid = false;
+		if(StringUtils.isEmpty(contentType) || StringUtils.isBlank(contentType)){
+			return false;
+		}else if("application/json".equalsIgnoreCase(contentType) || "application/xml".equalsIgnoreCase(contentType)){
+			valid = true;
+		}
+
+		return valid;
+	}
+
 	public static boolean resourceClassExist(String className, String resourceType, ResourceDocumentBuilder resouceDocumentBuilder){
 		Class classToVerify = null;
 		logger.info("Looking for interface " + resourceType);
@@ -203,7 +218,7 @@ public final class Utility {
 			classToVerify = Class.forName(className);
 			Class[] interfaceImplemented = classToVerify.getInterfaces();
 
-			// will pass the check for the timebeing if resourceType is "NA" but need a better way to handle and implement it !
+			// will pass the check for the time being if resourceType is "NA" but need a better way to handle and implement it !
 			if(resourceType.equals("NA")) {
 				return true;
 			}
@@ -215,7 +230,7 @@ public final class Utility {
 					return true;
 				}
 			}
-			//If not that means the resource doesn't implement the expected interface hence will log invalid information and reutrn false
+			//If not that means the resource doesn't implement the expected interface hence will log invalid information and return false
 			resouceDocumentBuilder.updateResourceInvalidInformation(String.format("Resource class name %s don't implement any one of %s interface hence this resource can not be hooked up while constructing resource ! \nPlease implement at least one of the interface in the controller  !",className,resourceType));
 			return false;
 

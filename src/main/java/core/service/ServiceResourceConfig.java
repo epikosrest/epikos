@@ -35,6 +35,7 @@ import core.domain.enums.Status;
 import core.dynamic.resources.domain.*;
 import core.engine.processor.*;
 import core.error.EpikosError;
+import core.exception.EpikosException;
 import core.filter.PostRequestFilter;
 import core.filter.PreRequestFilter;
 import core.intereceptor.RequestReaderIntereceptor;
@@ -164,7 +165,7 @@ public  class ServiceResourceConfig extends ResourceConfig {
     * Load dynamic resource from config file. Note the config file can be anyfile defined in Application.properties file
     * as value of key dynamic.resource.configuration
      */
-    private List<Api> loadDynamicResource(String dynamicResourceFileName) throws IOException,ParserException{
+    private List<Api> loadDynamicResource(String dynamicResourceFileName) throws IOException,ParserException,EpikosException{
 
         //Load dynamic resource information from file specified as value of key dynamic.resource.configuration defined in Application.Configuraiton
         DynamicResourceContainer dynamicResource = new DynamicResourceContainer();
@@ -179,7 +180,7 @@ public  class ServiceResourceConfig extends ResourceConfig {
 
     }
 
-    private DynamicResourceContainer loadDynamicResourceFromYaml(String fileName) throws IOException,ParserException{
+    private DynamicResourceContainer loadDynamicResourceFromYaml(String fileName) throws IOException,ParserException,EpikosException{
 
         Yaml yaml = new Yaml();
         DynamicResourceContainer config = null;
@@ -201,6 +202,13 @@ public  class ServiceResourceConfig extends ResourceConfig {
 
         }
 
+        final List<Api> concretApiList = new ArrayList<>();
+        if(config.getApiList()!=null && !config.getApiList().isEmpty()){
+            for(Api api : config.getApiList()){
+                concretApiList.add(ApiFactory.constructApiByType(api));
+            }
+            config.setApiList(concretApiList);
+        }
         return config;
     }
 
@@ -220,7 +228,7 @@ public  class ServiceResourceConfig extends ResourceConfig {
                     //spoof api . Also will check whether spoof response (JSON file) has been provided or not.
                     // If not then will skip
                     if(api.getServiceMode() != ServiceMode.SPOOF){
-                        Api spoofApi = new Api();
+                        Api spoofApi = new SpoofApi();
                         spoofApi.setConsume(api.getConsume());
                         spoofApi.setMethod(api.getMethod());
                         spoofApi.setPath(api.getPath() + SPOOF_URI);
@@ -261,12 +269,14 @@ public  class ServiceResourceConfig extends ResourceConfig {
     private boolean validateDynamicResource(Api api ,ResourceDocumentBuilder resourceDocumentBuilder){
 
         //Will check some of mandatory attribute for api e.g. status, method and path and make sure all attributes are valid before proceeding for next step
-        boolean validApi = isValidAPI(api,resourceDocumentBuilder);
-        if(!validApi){
-            return validApi;
+        if(!api.isValid()){
+            buildInvalidInformation(api, resourceDocumentBuilder);
+            return false;
         }
 
-        if(isExceptionalCase(api)){
+        //if(isExceptionalCase(api)){
+        if(api.isExceptionalCase()){
+
             if(!Utility.isValidMethod(api.getMethod()) || !Utility.isValidPath(api.getPath())) {
                 buildInvalidInformation(api,resourceDocumentBuilder);
                 return false;
@@ -279,7 +289,9 @@ public  class ServiceResourceConfig extends ResourceConfig {
         boolean resourceFound = (Utility.resourceClassExist(api.getController(),
                 IDynamicResourceController.class.getTypeName()+";"+
                         IDynamicResourceControllerGet.class.getTypeName() + ";" +
-                        IDynamicResourceControllerPOST.class.getTypeName()
+                        IDynamicResourceControllerPOST.class.getTypeName() + ";" +
+                        IDynamicResourceControllerDELETE.class.getTypeName() + ";" +
+                        IDynamicResourceControllerPUT.class.getTypeName()
                 ,resourceDocumentBuilder));
         if(!resourceFound){
             buildInvalidInformation(api,resourceDocumentBuilder);
@@ -312,25 +324,6 @@ public  class ServiceResourceConfig extends ResourceConfig {
         }
 
         return resourceFound;
-    }
-
-
-    private boolean isValidAPI(Api api,ResourceDocumentBuilder resourceDocumentBuilder){
-        boolean valid = true;
-        if(!(Utility.isValidStatusCode(api.getStatus()))){
-            valid = false;
-
-        }if(valid && !Utility.isValidMethod(api.getMethod())){
-            valid = false;
-
-        }if(valid && !Utility.isValidPath(api.getPath())){
-            valid = false;
-        }
-
-        if(!valid){
-            buildInvalidInformation(api, resourceDocumentBuilder);
-        }
-        return valid;
     }
 
     //This is to validate whether the Api signature qualify for exceptional case or not
@@ -382,7 +375,7 @@ public  class ServiceResourceConfig extends ResourceConfig {
      * @param resourceDocumentBuilder
      */
     private void buildAndRegisterApiDocument(ResourceDocumentBuilder resourceDocumentBuilder){
-        Api apiDocumentResource = new Api();
+        Api apiDocumentResource = new GetApi();
         apiDocumentResource.setConsume("application/json");
         apiDocumentResource.setProduce("text/html");
         apiDocumentResource.setPath("docs");
