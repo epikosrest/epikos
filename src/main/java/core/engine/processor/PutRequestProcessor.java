@@ -46,13 +46,7 @@ public class PutRequestProcessor extends RequestProcessor{
             List<Status> supportedStatus = getSupportedStatusListForPUTMethod();
             verifyStatusIsSupportedForTheMethod(supportedStatus,statusCode);
 
-            if(status.equals(Status.NOCONTENT)){
-                return Response.status(statusCode).type(mediaTypeToProduce).build();
-            }else if(status.equals(Status.CREATED)){
-                return Response.status(statusCode).entity(cont.process(dynamicRequest)).type(mediaTypeToProduce).build();
-            }
-
-            return Response.status(statusCode).type(mediaTypeToProduce).build();
+            return Response.status(statusCode).entity(cont.process(dynamicRequest)).type(mediaTypeToProduce).build();
 
         }catch (Exception exp) {
 

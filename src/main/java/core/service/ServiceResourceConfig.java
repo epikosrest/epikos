@@ -212,7 +212,7 @@ public  class ServiceResourceConfig extends ResourceConfig {
         return config;
     }
 
-    private void buildAndRegisterDynamicResource(List<Api> apiList,String serviceURI) {
+    private void buildAndRegisterDynamicResource(List<Api> apiList,String serviceURI) throws EpikosException{
         ResourceDocumentBuilder resourceDocumentBuilder = new ResourceDocumentBuilder();
         List<Resource> validResourceList = new ArrayList<>();
         if(apiList != null) {
@@ -266,7 +266,7 @@ public  class ServiceResourceConfig extends ResourceConfig {
      * @param api
      * @param resourceDocumentBuilder
      */
-    private boolean validateDynamicResource(Api api ,ResourceDocumentBuilder resourceDocumentBuilder){
+    private boolean validateDynamicResource(Api api ,ResourceDocumentBuilder resourceDocumentBuilder) throws EpikosException{
 
         //Will check some of mandatory attribute for api e.g. status, method and path and make sure all attributes are valid before proceeding for next step
         if(!api.isValid()){

@@ -1,6 +1,7 @@
 package core.domain.enums;
 
 
+import core.exception.EpikosException;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
@@ -28,15 +29,25 @@ public enum Status {
         this.status = status;
     }
 
-    static Map<String,Integer> lookup = new HashMap<>();
+    static Map<String,Status> lookup = new HashMap<>();
+
     static {
         for(Status key : values()){
-            lookup.put(key.name(),key.getStatus());
+            lookup.put(key.name(),key);
         }
     }
 
-    public static Integer getStatusCode(String status){
-        return lookup.get(status);
-    }
+    public static Integer getStatusCode(String status) throws EpikosException{
+       try {
+           Integer intStatus = Integer.parseInt(status);
+           if (intStatus>=0) {
+                return intStatus;
+           }
+       }catch (NumberFormatException nfExp){
+           return lookup.get(status).getStatus();
+       }
 
+        throw new EpikosException(String.format("Status %s is not a valid status code",status));
+
+    }
 }

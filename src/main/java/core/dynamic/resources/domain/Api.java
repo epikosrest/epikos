@@ -3,6 +3,7 @@ package core.dynamic.resources.domain;
 
 import core.domain.enums.ServiceMode;
 import core.domain.enums.Status;
+import core.exception.EpikosException;
 import core.lib.Utility;
 import lombok.Data;
 import lombok.Getter;
@@ -23,7 +24,7 @@ public class Api{
     String responseSpoof;
     ServiceMode serviceMode;
 
-    public boolean isValid(){
+    public boolean isValid() throws EpikosException{
         return false;
     }
 

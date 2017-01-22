@@ -31,6 +31,7 @@ import core.domain.enums.ServiceMode;
 import core.domain.enums.Status;
 import core.dynamic.resources.domain.Api;
 import core.dynamic.resources.domain.ResourceDocumentBuilder;
+import core.exception.EpikosException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -155,7 +156,7 @@ public final class Utility {
 
 	}
 
-	public static boolean isValidStatusCode(String status){
+	public static boolean isValidStatusCode(String status) throws EpikosException{
 		if(StringUtils.isEmpty(status) || StringUtils.isBlank(status)){
 			return false;
 		}

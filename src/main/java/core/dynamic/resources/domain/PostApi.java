@@ -1,5 +1,6 @@
 package core.dynamic.resources.domain;
 
+import core.exception.EpikosException;
 import core.lib.Utility;
 
 /**
@@ -7,7 +8,7 @@ import core.lib.Utility;
  */
 final public class PostApi extends Api{
     @Override
-    public boolean isValid() {
+    public boolean isValid() throws EpikosException{
         return Utility.isValidMethod(getMethod()) &&
                 Utility.isValidPath(getPath()) &&
                 Utility.isValidStatusCode(getStatus()) &&
