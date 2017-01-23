@@ -75,6 +75,20 @@ public abstract class RequestProcessor {
 
     }
 
+    protected final Response constructResponse(Object response,Integer statusCode){
+
+        if(response instanceof Response){
+            Response respToReturn = (Response)response;
+            if(!mediaTypeToProduce.toLowerCase().equals(respToReturn.getMediaType().toString().toLowerCase())){
+                logger.warn(String.format("Panic : media type to produce is mismatching ! Expected to produce %s but returned %s",mediaTypeToProduce,respToReturn.getMediaType()));
+            }
+
+            return respToReturn;
+        }
+
+        return Response.status(statusCode).entity(response).type(mediaTypeToProduce).build();
+    }
+
     public static Logger getLogger() {
         return logger;
     }

@@ -1,5 +1,6 @@
 package core.engine.processor;
 
+import core.domain.enums.Status;
 import core.dynamic.resources.domain.DynamicRequest;
 import core.dynamic.resources.domain.IDynamicResourceControllerGet;
 import core.exception.EpikosException;
@@ -32,18 +33,10 @@ public class GetRequestProcessor extends RequestProcessor {
         try {
 
             final DynamicRequest dynamicRequest = new DynamicRequest(containerRequestContext,pathParams);
+            Integer statusCode = Status.getStatusCode(status);
             metricsRecorder.startTimerContext();
             Object response = cont.process(dynamicRequest);
-            if(response instanceof Response){
-                Response respToReturn = (Response)response;
-                if(!mediaTypeToProduce.toLowerCase().equals(respToReturn.getMediaType().toString().toLowerCase())){
-                    logger.warn(String.format("Panic : media type to produce is mismatching ! Expected to produce %s but returned %s",mediaTypeToProduce,respToReturn.getMediaType()));
-                }
-
-                return respToReturn;
-            }
-
-            return Response.ok().entity(response).type(mediaTypeToProduce).build();
+            return constructResponse(response,statusCode);
 
         } finally {
             metricsRecorder.stopTimerContext();
