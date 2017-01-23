@@ -7,6 +7,7 @@ import core.error.EpikosError;
 import core.exception.EpikosException;
 import metrics.Metrics;
 import org.apache.commons.lang3.StringUtils;
+import org.glassfish.jersey.message.internal.OutboundJaxrsResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,8 +78,8 @@ public abstract class RequestProcessor {
 
     protected final Response constructResponse(Object response,Integer statusCode){
 
-        if(response instanceof Response){
-            Response respToReturn = (Response)response;
+        if(response instanceof OutboundJaxrsResponse || response instanceof Response){
+            OutboundJaxrsResponse respToReturn = (OutboundJaxrsResponse)response;
             if(!mediaTypeToProduce.toLowerCase().equals(respToReturn.getMediaType().toString().toLowerCase())){
                 logger.warn(String.format("Panic : media type to produce is mismatching ! Expected to produce %s but returned %s",mediaTypeToProduce,respToReturn.getMediaType()));
             }
