@@ -1,6 +1,7 @@
 package core.dynamic.resources.domain;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import core.exception.EpikosException;
 
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.MultivaluedMap;
@@ -23,10 +24,20 @@ public final class DynamicRequest implements IDynamicRequest{
     }
 
     @Override
-    public <T> T getReqeust(final Class<T> typeOfRequest) throws IOException,InstantiationException,IllegalAccessException {
+    public <T> T getRequest(final Class<T> typeOfRequest) throws EpikosException {
         ObjectMapper mapper = new ObjectMapper();
-        //Note: by this time the inputstream has been decoded by one of filter (PostRequestFilter/PreReqeustFilter)
-        return (T) mapper.readValue(requestStream, typeOfRequest.newInstance().getClass());
+        try {
+            //Note: by this time the inputstream has been decoded by one of filter (PostRequestFilter/PreReqeustFilter)
+            return (T) mapper.readValue(requestStream, typeOfRequest.newInstance().getClass());
+        }catch (IOException ioExp){
+            throw new EpikosException(ioExp.getMessage());
+
+        }catch (InstantiationException instExp){
+            throw new EpikosException(instExp.getMessage());
+
+        }catch (IllegalAccessException illExp){
+            throw new EpikosException(illExp.getMessage());
+        }
     }
 
     @Override
