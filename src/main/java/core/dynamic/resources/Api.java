@@ -1,4 +1,4 @@
-package core.dynamic.resources.domain;
+package core.dynamic.resources;
 
 
 import core.domain.enums.ServiceMode;

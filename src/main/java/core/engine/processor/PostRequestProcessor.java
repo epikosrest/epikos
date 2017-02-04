@@ -1,8 +1,8 @@
 package core.engine.processor;
 
 import core.domain.enums.Status;
-import core.dynamic.resources.domain.DynamicRequest;
-import core.dynamic.resources.domain.IDynamicResourceControllerPOST;
+import core.dynamic.resources.DynamicRequest;
+import core.dynamic.resources.IDynamicResourceControllerPOST;
 
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.MultivaluedMap;

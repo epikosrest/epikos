@@ -1,4 +1,4 @@
-package core.dynamic.resources.domain;
+package core.dynamic.resources;
 
 import core.exception.EpikosException;
 import core.lib.Utility;
@@ -6,8 +6,7 @@ import core.lib.Utility;
 /**
  * Created by nitina on 12/24/16.
  */
-final public class PatchApi extends Api{
-
+final public class PostApi extends Api{
     @Override
     public boolean isValid() throws EpikosException{
         return Utility.isValidMethod(getMethod()) &&

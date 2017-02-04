@@ -1,8 +1,8 @@
 package core.engine.processor;
 
 import core.domain.enums.Status;
-import core.dynamic.resources.domain.DynamicRequest;
-import core.dynamic.resources.domain.IDynamicResourceControllerPUT;
+import core.dynamic.resources.DynamicRequest;
+import core.dynamic.resources.IDynamicResourceControllerPUT;
 import metrics.Metrics;
 
 import javax.ws.rs.container.ContainerRequestContext;

@@ -1,4 +1,4 @@
-package core.dynamic.resources.domain;
+package core.dynamic.resources;
 
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.MultivaluedMap;

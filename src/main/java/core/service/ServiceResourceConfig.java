@@ -32,7 +32,7 @@ import com.wordnik.swagger.jaxrs.config.BeanConfig;
 import core.domain.enums.Method;
 import core.domain.enums.ServiceMode;
 import core.domain.enums.Status;
-import core.dynamic.resources.domain.*;
+import core.dynamic.resources.*;
 import core.engine.processor.*;
 import core.error.EpikosError;
 import core.exception.EpikosException;

@@ -1,4 +1,4 @@
-package core.dynamic.resources.domain;
+package core.dynamic.resources;
 
 import java.util.ArrayList;
 import java.util.List;

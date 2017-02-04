@@ -1,4 +1,4 @@
-package core.dynamic.resources.domain;
+package core.dynamic.resources;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import core.exception.EpikosException;

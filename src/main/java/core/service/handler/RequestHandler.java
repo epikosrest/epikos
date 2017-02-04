@@ -2,7 +2,7 @@ package core.service.handler;
 
 import core.domain.enums.ServiceMode;
 import core.domain.enums.Status;
-import core.dynamic.resources.domain.Api;
+import core.dynamic.resources.Api;
 import core.engine.processor.RequestProcessor;
 import core.engine.processor.RequestProcessorFactory;
 import core.engine.processor.SpoofRequestProcessor;

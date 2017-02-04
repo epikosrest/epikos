@@ -1,4 +1,4 @@
-package core.dynamic.resources.domain;
+package core.dynamic.resources;
 
 import core.exception.EpikosException;
 import core.lib.Utility;

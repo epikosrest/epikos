@@ -1,8 +1,8 @@
 package core.engine.processor;
 
 import core.domain.enums.Status;
-import core.dynamic.resources.domain.DynamicRequest;
-import core.dynamic.resources.domain.IDynamicResourceControllerGet;
+import core.dynamic.resources.DynamicRequest;
+import core.dynamic.resources.IDynamicResourceControllerGet;
 import core.exception.EpikosException;
 import metrics.Metrics;
 import org.slf4j.Logger;
