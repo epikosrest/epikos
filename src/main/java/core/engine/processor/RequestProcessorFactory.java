@@ -36,7 +36,7 @@ public class RequestProcessorFactory {
             requestProcessor = new DeleteRequestProcessor(controller,metricsRecorder,containerRequestContext,mediaTypeToProduce,status);
 
         }else if (method.equals(Method.PATCH.getMethodName())){
-            throw new NotImplementedException();
+            requestProcessor = new PatchRequestProcessor(controller,metricsRecorder,containerRequestContext,mediaTypeToProduce,status);
         }else{
             throw new RuntimeException("Panic: Unknown method");
         }

@@ -16,11 +16,11 @@ public class PreRequestFilter implements ContainerRequestFilter {
     @Override
     public void filter(ContainerRequestContext requestContext)
             throws IOException {
-        //ToDo: at this time we have not implemented any specific functionality using pre ContainerReqeustFilter
-        //At minimum will just match PUT to POST internally and route all PUT request to POST method
-
-        if (requestContext.getMethod().equals(HttpMethod.PUT)) {
+        //Here we can override behavior if we want to handle/process incoming request method as we want
+        //e.g. below a PUT method is being overridden by POST. The consequence ? PUT method request might be redirected to POST
+        //handler ! Note: this is just an example what can be done here !
+        /*if (requestContext.getMethod().equals(HttpMethod.PUT)) {
             requestContext.setMethod(HttpMethod.POST);
-        }
+        }*/
     }
 }

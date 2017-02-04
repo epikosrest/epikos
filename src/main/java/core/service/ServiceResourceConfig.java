@@ -291,7 +291,8 @@ public  class ServiceResourceConfig extends ResourceConfig {
                         IDynamicResourceControllerGet.class.getTypeName() + ";" +
                         IDynamicResourceControllerPOST.class.getTypeName() + ";" +
                         IDynamicResourceControllerDELETE.class.getTypeName() + ";" +
-                        IDynamicResourceControllerPUT.class.getTypeName()
+                        IDynamicResourceControllerPUT.class.getTypeName() + ";" +
+                        IDynamicResourceControllerPATCH.class.getTypeName()
                 ,resourceDocumentBuilder));
         if(!resourceFound){
             buildInvalidInformation(api,resourceDocumentBuilder);
