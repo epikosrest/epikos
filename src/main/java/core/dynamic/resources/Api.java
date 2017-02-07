@@ -25,7 +25,7 @@ public class Api{
     ServiceMode serviceMode;
 
     public boolean isValid() throws EpikosException{
-        return false;
+        return true;
     }
 
 

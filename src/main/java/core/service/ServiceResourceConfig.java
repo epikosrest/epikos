@@ -57,6 +57,7 @@ import restserver.Service;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.ws.rs.BadRequestException;
+import javax.ws.rs.GET;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
@@ -286,7 +287,7 @@ public  class ServiceResourceConfig extends ResourceConfig {
         }
 
         //Otherwise validate if any one of component (request,response and controller) present and is valid
-        boolean resourceFound = (Utility.resourceClassExist(api.getController(),
+        boolean resourceFound = (Utility.doesResourceClassExist(api.getController(),
                 IDynamicResourceController.class.getTypeName()+";"+
                         IDynamicResourceControllerGet.class.getTypeName() + ";" +
                         IDynamicResourceControllerPOST.class.getTypeName() + ";" +
@@ -298,7 +299,7 @@ public  class ServiceResourceConfig extends ResourceConfig {
             buildInvalidInformation(api,resourceDocumentBuilder);
             resourceFound = false;
         }
-        if(api.getRequest() != null && !Utility.resourceClassExist(api.getRequest()
+        if(api.getRequest() != null && !Utility.doesResourceClassExist(api.getRequest()
                 ,"NA",resourceDocumentBuilder)){
             if(!Utility.isResourceAJSONObject(api.getRequest())) {
 
@@ -307,7 +308,7 @@ public  class ServiceResourceConfig extends ResourceConfig {
             }
         }
 
-        if(api.getResponse() != null && !Utility.resourceClassExist(api.getResponse()
+        if(api.getResponse() != null && !Utility.doesResourceClassExist(api.getResponse()
                 ,"NA",resourceDocumentBuilder)){
             if(!Utility.isResourceAJSONObject(api.getResponse())) {
                 buildInvalidInformation(api, resourceDocumentBuilder);

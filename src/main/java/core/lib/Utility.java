@@ -30,8 +30,10 @@ import core.domain.enums.Method;
 import core.domain.enums.ServiceMode;
 import core.domain.enums.Status;
 import core.dynamic.resources.Api;
+import core.dynamic.resources.IMethod;
 import core.dynamic.resources.ResourceDocumentBuilder;
 import core.exception.EpikosException;
+import javassist.NotFoundException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -175,16 +177,26 @@ public final class Utility {
 	}
 
 	public static boolean isValidMethod(String method){
-		if(StringUtils.isEmpty(method) || StringUtils.isBlank(method)){
-			return false;
-		}
-		for(Method m : Method.values()){
-			if(method.equalsIgnoreCase(m.name())){
-				return true;
-			}
-		}
-		return false;
+		boolean methodIsValid = doesMethodExist(method);
+        //Will check if it is a custom method or not
+        if(!methodIsValid){
+            methodIsValid = Utility.doesResourceTypeImplementInterfaceListed(method, IMethod.class.getTypeName());
+        }
+
+		return methodIsValid;
 	}
+
+    private static boolean doesMethodExist(String method){
+
+        if(!(StringUtils.isEmpty(method) && StringUtils.isBlank(method))) {
+            for (Method m : Method.values()) {
+                if (method.equalsIgnoreCase(m.name())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
 	public static boolean isValidPath(String path){
 		if(StringUtils.isEmpty(path) || StringUtils.isBlank(path)){
@@ -208,7 +220,7 @@ public final class Utility {
 		return valid;
 	}
 
-	public static boolean resourceClassExist(String className, String resourceType, ResourceDocumentBuilder resouceDocumentBuilder){
+	public static boolean doesResourceClassExist(String className, String resourceType, ResourceDocumentBuilder resouceDocumentBuilder){
 		Class classToVerify = null;
 		logger.info("Looking for interface " + resourceType);
 		try{
@@ -216,21 +228,16 @@ public final class Utility {
 				resouceDocumentBuilder.updateResourceInvalidInformation(String.format("Resource class name %s is either empty or not defined !",className));
 				return false;
 			}
-			classToVerify = Class.forName(className);
-			Class[] interfaceImplemented = classToVerify.getInterfaces();
 
-			// will pass the check for the time being if resourceType is "NA" but need a better way to handle and implement it !
-			if(resourceType.equals("NA")) {
-				return true;
-			}
-			//Check if the resource class has implemented correct interface i.e. IDynamicController/Get/POST
-			for (Class interfaceImp : interfaceImplemented) {
-				logger.info("Interface : " + interfaceImp.getName());
+            // will pass the check for the time being if resourceType is "NA" but need a better way to handle and implement it !
+            if(resourceType != null && resourceType.equals("NA")) {
+                return true;
+            }
 
-				if (resourceType.contains(interfaceImp.getName())) {
-					return true;
-				}
-			}
+			classToVerify = verifyAndReturnResourceClass(className);
+			if(hasClassImplementedInterface(classToVerify,resourceType)){
+                return true;
+            }
 			//If not that means the resource doesn't implement the expected interface hence will log invalid information and return false
 			resouceDocumentBuilder.updateResourceInvalidInformation(String.format("Resource class name %s don't implement any one of %s interface hence this resource can not be hooked up while constructing resource ! \nPlease implement at least one of the interface in the controller  !",className,resourceType));
 			return false;
@@ -240,5 +247,55 @@ public final class Utility {
 					className));
 			return false;
 		}
+	}
+
+
+	/***
+	 * This function is to handle custom http method in future (at this time it doesn't do any validation as is not
+	 * supported). Once Jersey processing of http method figured out or in future Jersey allow custom http method
+	 * other than standard http method e.g. GET, POST , PUT , PATCH, DELETE etc.
+	 * @param resourceClassName
+	 * @param interfaceName
+     * @return
+     */
+    public static boolean doesResourceTypeImplementInterfaceListed(String resourceClassName,String interfaceName){
+        boolean classImplementInterface = false;
+        try {
+            Class classToVerify = verifyAndReturnResourceClass(resourceClassName);
+            classImplementInterface = hasClassImplementedInterface(classToVerify,interfaceName);
+
+        }catch (ClassNotFoundException cnfExp){
+            //Will not do anything except logging it as error which is being taken care by private methods
+        }finally {
+            return classImplementInterface;
+        }
+
+    }
+
+	private static Class verifyAndReturnResourceClass(String className) throws ClassNotFoundException{
+		Class classToVerify = null;
+		try {
+			classToVerify = Class.forName(className);
+		}catch (ClassNotFoundException cnfExp){
+			logger.info(String.format("%s class name not found !\n",className) + cnfExp.getMessage());
+            throw cnfExp;
+		}finally {
+			return classToVerify;
+		}
+	}
+
+	private static boolean hasClassImplementedInterface(Class className,String interfaceName){
+		boolean classHasImplementedInterface = false;
+        Class[] interfaceImplemented = className.getInterfaces();
+        for (Class interfaceImp : interfaceImplemented) {
+            logger.info("Interface : " + interfaceImp.getName());
+
+            if (interfaceName.contains(interfaceImp.getName())) {
+                classHasImplementedInterface = true;
+                break;
+            }
+        }
+
+		return classHasImplementedInterface;
 	}
 }

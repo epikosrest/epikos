@@ -1,6 +1,7 @@
 package core.dynamic.resources;
 
 import core.exception.EpikosException;
+import core.lib.Utility;
 
 /**
  * Created by nitina on 1/14/17.
@@ -9,7 +10,7 @@ public class ApiFactory {
 
     public static Api constructApiByType(Api api) throws EpikosException{
 
-        Api returnApi;
+        Api returnApi = api;
 
         switch (api.getMethod()){
             case "GET":
@@ -33,7 +34,9 @@ public class ApiFactory {
                 copyProperties(api,returnApi);
                 break;
             default:
-                throw new EpikosException(String.format("Invalid method type %s",api.getMethod()));
+                if(!Utility.doesResourceTypeImplementInterfaceListed(api.getMethod(),IMethod.class.getTypeName())) {
+                    throw new EpikosException(String.format("Invalid method type %s", api.getMethod()));
+                }
 
         }
         return returnApi;
