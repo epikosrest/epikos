@@ -29,6 +29,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import com.fasterxml.jackson.databind.util.BeanUtil;
 import com.wordnik.swagger.jaxrs.config.BeanConfig;
+import com.wordnik.swagger.jersey.listing.ApiListingResourceJSON;
+import com.wordnik.swagger.jersey.listing.JerseyApiDeclarationProvider;
+import com.wordnik.swagger.jersey.listing.JerseyResourceListingProvider;
+import controller.GetController;
 import core.domain.enums.Method;
 import core.domain.enums.ServiceMode;
 import core.domain.enums.Status;
@@ -43,6 +47,7 @@ import core.intereceptor.ResponseWriterInterceptor;
 import core.lib.Utility;
 import core.service.handler.RequestHandler;
 import core.spoof.Spoof;
+//import io.swagger.jaxrs.config.BeanConfig;
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.moxy.json.MoxyJsonConfig;
 import org.glassfish.jersey.process.Inflector;
@@ -100,18 +105,24 @@ public  class ServiceResourceConfig extends ResourceConfig {
             buildAndRegisterInvalidDocInfo("The dynamic resource api list is an invalid yml file. Please check the api list and fix following issue \n" + parserExp.getMessage());
         }
 
-        register(com.wordnik.swagger.jersey.listing.ApiListingResourceJSON.class);
-        register(com.wordnik.swagger.jersey.listing.JerseyApiDeclarationProvider.class);
-        register(com.wordnik.swagger.jersey.listing.JerseyResourceListingProvider.class);
+        //register(com.wordnik.swagger.jersey.listing.ApiListingResourceJSON.class);
+        //register(com.wordnik.swagger.jersey.listing.JerseyApiDeclarationProvider.class);
+        //register(com.wordnik.swagger.jersey.listing.JerseyResourceListingProvider.class);
         register(new CrossDomainFilter());
         register(createMoxyJsonResolver()); //JSON support
         register(RequestReaderIntereceptor.class);
         register(ResponseWriterInterceptor.class); //Register to support gzip encoding in response
         register(PreRequestFilter.class);
         register(PostRequestFilter.class);
+        //register(GetController.class);
+        register(JerseyApiDeclarationProvider.class);
+        register(JerseyResourceListingProvider.class);
+        register(ApiListingResourceJSON.class);
 
 
-        packages(metaData.getResourcePackageName());
+        //packages("controller","resetserver");
+        packages("controller","com.wordnik.swagger.jersey.listing");
+        //packages(metaData.getResourcePackageName());
         beanConfiguration(metaData);
     }
 
@@ -123,28 +134,38 @@ public  class ServiceResourceConfig extends ResourceConfig {
 
         @Override
         public void filter(ContainerRequestContext creq, ContainerResponseContext cres) {
-            cres.getHeaders().add("Access-Control-Allow-Origin", "");
-            cres.getHeaders().add("Access-Control-Allow-Headers", "");
-            cres.getHeaders().add("Access-Control-Allow-Credentials", "");
-            cres.getHeaders().add("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT");
-            cres.getHeaders().add("Access-Control-Max-Age", "");
             cres.getHeaders().add("Access-Control-Allow-Origin", "*");
+            cres.getHeaders().add("Access-Control-Allow-Headers", "Content-Type, api_key, Authorization");
+            cres.getHeaders().add("Access-Control-Allow-Credentials", "");
+            cres.getHeaders().add("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT, PATCH, OPTIONS");
+            cres.getHeaders().add("Access-Control-Max-Age", "");
         }
     }
 
+    /***
+     * Function to integrate swagger api doc . The server uri + /api-docs provide the detail of swagger for api
+     * ToDo:  at this time it is not working properly and need fix !
+     * @param metaData
+     */
     public static void beanConfiguration(IServiceMetaData metaData){
         BeanConfig beanConfig = new BeanConfig();
         beanConfig.setVersion("1.0");
-        beanConfig.setScan(true);
-        if(metaData.getResourcePackageName() != null) {
+        //beanConfig.setSchemes(new String[]{"http"});
+
+        /*if(metaData.getResourcePackageName() != null) {
             for (String resourcePackage : metaData.getResourcePackageName()) {
                 beanConfig.setResourcePackage(resourcePackage);
             }
-        }
-        beanConfig.setResourcePackage(Service.class.getPackage().getName());
-        beanConfig.setBasePath(metaData.getServiceURI());
+        }*/
+        beanConfig.setResourcePackage("");
+        //beanConfig.setBasePath(metaData.getServiceURI());
         beanConfig.setDescription("Resources");
         beanConfig.setTitle("Apis");
+
+        beanConfig.setScan(true);
+
+        System.out.println("base path " +beanConfig.getBasePath());
+        System.out.println("resource package " +beanConfig.getResourcePackage());
     }
 
     private Resource scanAndBuildResources(final Api drmetaData){

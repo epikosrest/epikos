@@ -7,11 +7,14 @@ apiList:
     method: GET
     response: spoof/test_response.json
     status: OK
-#  - consume: application/json
-#    produce: text/html
-#    path: test/{testid}/hello
-#    method: GET
-#    response: spoof/test_response.json
+  - consume: application/json
+    produce: application/json
+    path: test/hello
+    method: GET
+    status: OK
+    response: response.Response
+    response: spoof/test_response.json
+    controller: controller.GetController
 #  - consume: application/json
 #    produce: application/json
 #    path: test/hello

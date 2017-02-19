@@ -28,6 +28,7 @@ import core.service.IServiceMetaData;
 import core.service.ServiceMetaData;
 import core.service.ServiceResourceConfig;
 import core.lib.configuration.Configuration;
+import org.glassfish.grizzly.http.server.CLStaticHttpHandler;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.grizzly.http.server.NetworkListener;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
@@ -103,11 +104,22 @@ public class Service implements IService{
     }
 
     private void startServer(String serviceURI, ResourceConfig resource) throws IOException{
+
+        String[] pack = {"controller", "com.wordnik.swagger.jersey.listing"};
+        resource.packages(pack);
+
         grizzlyServer = GrizzlyHttpServerFactory.createHttpServer(
                 URI.create(serviceURI), resource, false);
         NetworkListener listener = grizzlyServer.getListener("grizzly");
 		grizzlyServer.addListener(listener);
         grizzlyServer.getServerConfiguration().setJmxEnabled(true);
+
+        CLStaticHttpHandler staticHttpHandler = new CLStaticHttpHandler(Service.class.getClassLoader(), "swagger-ui/");
+        //Bug: Grizzly currently has a bug as how it handles paths for static resources
+        // It need trailing slash at the end to create static handler e.g. /docs/ as shown below
+        //Also you can put "/" to map swagger-ui to root of url e.g. to map just http://localhost:8080
+        grizzlyServer.getServerConfiguration().addHttpHandler(staticHttpHandler, "/docs/");
+
         grizzlyServer.start();
 
     }
