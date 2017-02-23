@@ -96,3 +96,6 @@ This service is free and can be used by anyone to enhance and use for any purpos
 
 Feedback are welcome: please send it to epikosrest@gmail.com
 
+
+Note: For swagger support this project has compied old swagger ui version from (https://github.com/ServiceStack/ServiceStack/tree/master/src/ServiceStack.Api.Swagger/swagger-ui)
+

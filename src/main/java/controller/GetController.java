@@ -28,6 +28,7 @@ public class GetController implements IDynamicResourceControllerGet{
     @GET
     @Path("/test1")
     @Produces(MediaType.APPLICATION_JSON)
+
     @ApiOperation(value = "A test1 operation", notes = "More notes about this method 1", response = Service.class)
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid ID supplied 1"),

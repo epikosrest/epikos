@@ -157,8 +157,9 @@ public  class ServiceResourceConfig extends ResourceConfig {
                 beanConfig.setResourcePackage(resourcePackage);
             }
         }*/
+
         beanConfig.setResourcePackage("");
-        //beanConfig.setBasePath(metaData.getServiceURI());
+        beanConfig.setBasePath(metaData.getServiceURI());
         beanConfig.setDescription("Resources");
         beanConfig.setTitle("Apis");
 
