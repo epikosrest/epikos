@@ -27,17 +27,18 @@ public class SwaggerApiTemplateLoader {
         String fqdnClassName = "external.swagger.SwaggerApiDocumentation";
         String parentPath = System.getProperty("user.dir") + "\\src\\main\\java\\external\\swagger";
         String classPath = System.getProperty("user.dir") + "\\target\\classes\\external\\swagger";
-         CachedCompiler JCC = CompilerUtils.DEBUGGING ?
-                new CachedCompiler(null, new File("temp", "")) :
-                CompilerUtils.CACHED_COMPILER;
+         CachedCompiler JCC =
+                new CachedCompiler(null, new File("temp", ""));
+
         JCC.loadFromJava(fqdnClassName,javaCode);
+
 
         File sourceFile = new File(System.getProperty("user.dir") + "/temp/external/swagger/SwaggerApiDocumentation.class");
         File destinationFile = new File(System.getProperty("user.dir") + "/target/classes/external/swagger/SwaggerApiDocumentation.class");
         Files.move(sourceFile.toPath(),destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
         //Class aClass = CompilerUtils.CACHED_COMPILER.loadFromJava(fqdnClassName, javaCode);
-        ////ClassLoader classLoader = SwaggerApiTemplateLoader.class.getClassLoader();
+        ////ClassLoader classLoader = SwaggerApiTemplateLoader.class.getClassLoader();m
         ////Class aClass = CompilerUtils.loadFromResource(fqdnClassName, javaCode);
         //String  name = aClass.getName();
         ////classLoader.loadClass(aClass.getName());
