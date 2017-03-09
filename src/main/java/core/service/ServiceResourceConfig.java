@@ -48,6 +48,8 @@ import core.lib.Utility;
 import core.service.handler.RequestHandler;
 import core.spoof.Spoof;
 //import io.swagger.jaxrs.config.BeanConfig;
+import external.swagger.SwaggerApiTemplateLoader;
+import io.swagger.models.Swagger;
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.moxy.json.MoxyJsonConfig;
 import org.glassfish.jersey.process.Inflector;
@@ -92,6 +94,8 @@ public  class ServiceResourceConfig extends ResourceConfig {
     public ServiceResourceConfig(IServiceMetaData metaData) throws Exception{
         this.metaData = metaData;
 
+        SwaggerApiTemplateLoader.loadTemplate(); //Load and Construct Swagger API doc on the fly
+
         List<Api> apiList = new ArrayList<>();
         try {
 
@@ -104,6 +108,7 @@ public  class ServiceResourceConfig extends ResourceConfig {
         }catch (ParserException parserExp){
             buildAndRegisterInvalidDocInfo("The dynamic resource api list is an invalid yml file. Please check the api list and fix following issue \n" + parserExp.getMessage());
         }
+
 
         //register(com.wordnik.swagger.jersey.listing.ApiListingResourceJSON.class);
         //register(com.wordnik.swagger.jersey.listing.JerseyApiDeclarationProvider.class);
@@ -121,7 +126,7 @@ public  class ServiceResourceConfig extends ResourceConfig {
 
 
         //packages("controller","resetserver");
-        packages("controller","com.wordnik.swagger.jersey.listing");
+        //packages("com.wordnik.swagger.jersey.listing","core.external","external.swagger");
         //packages(metaData.getResourcePackageName());
         beanConfiguration(metaData);
     }
@@ -158,12 +163,13 @@ public  class ServiceResourceConfig extends ResourceConfig {
             }
         }*/
 
-        beanConfig.setResourcePackage("");
+        beanConfig.setResourcePackage("external.swagger");
         beanConfig.setBasePath(metaData.getServiceURI());
         beanConfig.setDescription("Resources");
         beanConfig.setTitle("Apis");
 
         beanConfig.setScan(true);
+
 
         System.out.println("base path " +beanConfig.getBasePath());
         System.out.println("resource package " +beanConfig.getResourcePackage());

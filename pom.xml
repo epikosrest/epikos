@@ -117,6 +117,13 @@ SOFTWARE.>
 			<scope>provided</scope>
 		</dependency>
 
+        <!-- https://mvnrepository.com/artifact/net.openhft/chronicle -->
+        <dependency>
+            <groupId>net.openhft</groupId>
+            <artifactId>chronicle</artifactId>
+            <version>3.6.4</version>
+        </dependency>
+
     </dependencies>
 
 

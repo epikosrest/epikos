@@ -105,8 +105,8 @@ public class Service implements IService{
 
     private void startServer(String serviceURI, ResourceConfig resource) throws IOException{
 
-        String[] pack = {"controller", "com.wordnik.swagger.jersey.listing"};
-        resource.packages(pack);
+        //String[] pack = {"controller", "com.wordnik.swagger.jersey.listing"};
+        //resource.packages(pack);
 
         grizzlyServer = GrizzlyHttpServerFactory.createHttpServer(
                 URI.create(serviceURI), resource, false);

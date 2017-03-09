@@ -15,6 +15,14 @@ apiList:
     response: response.Response
     response: spoof/test_response.json
     controller: controller.GetController
+  - consume: application/json
+    produce: application/json
+    path: swagger/doc1
+    method: GET
+    status: OK
+    response: response.Response
+    response: spoof/test_response.json
+    controller: controller.GetController
 #  - consume: application/json
 #    produce: application/json
 #    path: test/hello
