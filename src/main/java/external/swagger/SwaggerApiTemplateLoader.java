@@ -23,12 +23,14 @@ public class SwaggerApiTemplateLoader {
     public final static void loadTemplate() throws Exception{
 
         //Ref: https://github.com/OpenHFT/Java-Runtime-Compiler/issues/23
+
         String javaCode = loadSwaggerApiTemplate();
         String fqdnClassName = "external.swagger.SwaggerApiDocumentation";
         String parentPath = System.getProperty("user.dir") + "\\src\\main\\java\\external\\swagger";
         String classPath = System.getProperty("user.dir") + "\\target\\classes\\external\\swagger";
-         CachedCompiler JCC =
-                new CachedCompiler(null, new File("temp", ""));
+
+        //Ref: https://github.com/OpenHFT/Java-Runtime-Compiler
+        CachedCompiler JCC = new CachedCompiler(null, new File("temp", ""));
 
         JCC.loadFromJava(fqdnClassName,javaCode);
 

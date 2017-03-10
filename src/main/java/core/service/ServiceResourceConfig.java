@@ -163,7 +163,7 @@ public  class ServiceResourceConfig extends ResourceConfig {
             }
         }*/
 
-        beanConfig.setResourcePackage("external.swagger");
+        beanConfig.setResourcePackage("");
         beanConfig.setBasePath(metaData.getServiceURI());
         beanConfig.setDescription("Resources");
         beanConfig.setTitle("Apis");
