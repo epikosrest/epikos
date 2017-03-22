@@ -1,15 +1,13 @@
 //Ref https://www.quora.com/How-can-I-dynamically-create-a-Java-class-and-execute-its-methods-at-runtime
+//Include Package if it suppose to be part of package here and don't forget to update SwaggerApiTemplateLoader.java accordingly
 package external.swagger;
 
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
-import core.dynamic.resources.IDynamicRequestGET;
-import core.dynamic.resources.IDynamicResourceControllerGet;
 import core.error.EpikosError;
-import response.Response;
-import restserver.Service;
+import example.response.Response;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -19,14 +17,14 @@ import javax.ws.rs.core.MediaType;
 /**
  * Created by nitina on 2/19/17.
  */
-@Path("swagger")
+//@Path("swagger")
 //@Api(value = "%ApiValue%", description = "%ApiDescription%")
 @Api(value = "Api Doc", description = "Swagger documentation for API(s)")
 public class SwaggerApiDocumentation { //implements Runnable{
 
 
     @GET
-    @Path("/doc1")
+    @Path("swagger/doc1")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "First API", notes = "More notes about this method 1", response = Response.class)
     @ApiResponses(value = {
@@ -37,10 +35,10 @@ public class SwaggerApiDocumentation { //implements Runnable{
             @ApiResponse(code = 400, message = "Invalid ID supplied 1", response = EpikosException.class),
             @ApiResponse(code = 500, message = "Server is down! 1" , response = EpikosException.class)
     })*/
-    public Response process0() {
-        Response res =  new Response();
-        res.setTest("first response 1");
-        return res;
+    public void process0() {
+        //Response res =  new Response();
+        //res.setTest("first response 1");
+        //return res;
 
     }
 
@@ -51,16 +49,14 @@ public class SwaggerApiDocumentation { //implements Runnable{
     */
 
     @GET
-    @Path("/doc2")
+    @Path("swagger/doc2")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "A test2 operation", notes = "More notes about this method 2", response = Response.class)
+    @ApiOperation(value = "A operation", notes = "More notes about this method 2", response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Invalid ID supplied 2", response = EpikosError.class),
             @ApiResponse(code = 500, message = "Server is down! 2", response = EpikosError.class)
     })
-    public Response process1()  {
-        Response res =  new Response();
-        res.setTest("first response 2");
-        return res;
+    public void process1()  {
+        //Do nothing as its proxy
     }
 }

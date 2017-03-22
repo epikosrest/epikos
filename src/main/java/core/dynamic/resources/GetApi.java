@@ -13,5 +13,7 @@ final public class GetApi extends Api{
        return Utility.isValidMethod(getMethod()) &&
                        Utility.isValidPath(getPath()) &&
                        Utility.isValidStatusCode(getStatus());
+        //ToDo: do we need controller validation as well ? Investigate !
+        //&& getController()==null?true:Utility.isValidClass(getController());
     }
 }

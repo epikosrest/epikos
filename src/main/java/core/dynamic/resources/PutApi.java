@@ -15,5 +15,7 @@ final public class PutApi extends Api{
                 Utility.isValidStatusCode(getStatus()) &&
                 Utility.isValidContentType(getConsume()) &&
                 Utility.isValidContentType(getProduce());
+        //ToDo: do we need controller validation as well ? Investigate !
+        //&& getController()==null?true:Utility.isValidClass(getController());
     }
 }
