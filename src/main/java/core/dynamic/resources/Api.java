@@ -8,6 +8,9 @@ import core.lib.Utility;
 import lombok.Data;
 import lombok.Getter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by nitina on 5/8/16.
  */
@@ -23,7 +26,15 @@ public class Api{
     String status;
     String responseSpoof;
     ServiceMode serviceMode;
+    List<ApiResponse> responseList = new ArrayList();
 
+
+    /***
+     * This will get override by API specific implementation i.e. API classes that extend Api class and will determine
+     * or define valid definition of it's own e.g. GetApi, PostApi etc classes extends API class and override this function
+     * @return
+     * @throws EpikosException
+     */
     public boolean isValid() throws EpikosException{
         return true;
     }

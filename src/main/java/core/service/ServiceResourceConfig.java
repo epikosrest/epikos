@@ -22,19 +22,12 @@ SOFTWARE.
 
 package core.service;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.MappingJsonFactory;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
-import com.fasterxml.jackson.databind.util.BeanUtil;
 import com.wordnik.swagger.jaxrs.config.BeanConfig;
-import core.domain.enums.Method;
+import com.wordnik.swagger.jersey.listing.ApiListingResourceJSON;
+import com.wordnik.swagger.jersey.listing.JerseyApiDeclarationProvider;
+import com.wordnik.swagger.jersey.listing.JerseyResourceListingProvider;
 import core.domain.enums.ServiceMode;
-import core.domain.enums.Status;
 import core.dynamic.resources.*;
-import core.engine.processor.*;
-import core.error.EpikosError;
 import core.exception.EpikosException;
 import core.filter.PostRequestFilter;
 import core.filter.PreRequestFilter;
@@ -42,10 +35,10 @@ import core.intereceptor.RequestReaderIntereceptor;
 import core.intereceptor.ResponseWriterInterceptor;
 import core.lib.Utility;
 import core.service.handler.RequestHandler;
-import core.spoof.Spoof;
+import external.swagger.EpikosApiToSwaggerApiDocGenerator;
+import external.swagger.SwaggerApiTemplateLoader;
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.moxy.json.MoxyJsonConfig;
-import org.glassfish.jersey.process.Inflector;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.model.Resource;
 import org.glassfish.jersey.server.model.ResourceMethod;
@@ -53,27 +46,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.parser.ParserException;
-import restserver.Service;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.GET;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ContextResolver;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
+
+//import io.swagger.jaxrs.config.BeanConfig;
 
 /**
  * Created by nitina on 5/4/16.
@@ -86,12 +73,14 @@ public  class ServiceResourceConfig extends ResourceConfig {
 
     public ServiceResourceConfig(IServiceMetaData metaData) throws Exception{
         this.metaData = metaData;
-
         List<Api> apiList = new ArrayList<>();
+
         try {
 
             apiList = loadDynamicResource(metaData.getDynamicResourceConfigLocation());
             buildAndRegisterDynamicResource(apiList, metaData.getServiceURI());
+            //SwaggerApiTemplateLoader.loadTemplate(); //Load and Construct Swagger API doc on the fly
+
 
         }catch (IOException ioExp){
             buildAndRegisterInvalidDocInfo("The dynamic resource api list file is not available. Please check the value dynamic.resource.configuration in Application.configuration file and make sure the file exist !\n" + ioExp.getMessage());
@@ -100,19 +89,18 @@ public  class ServiceResourceConfig extends ResourceConfig {
             buildAndRegisterInvalidDocInfo("The dynamic resource api list is an invalid yml file. Please check the api list and fix following issue \n" + parserExp.getMessage());
         }
 
-        register(com.wordnik.swagger.jersey.listing.ApiListingResourceJSON.class);
-        register(com.wordnik.swagger.jersey.listing.JerseyApiDeclarationProvider.class);
-        register(com.wordnik.swagger.jersey.listing.JerseyResourceListingProvider.class);
         register(new CrossDomainFilter());
         register(createMoxyJsonResolver()); //JSON support
         register(RequestReaderIntereceptor.class);
         register(ResponseWriterInterceptor.class); //Register to support gzip encoding in response
         register(PreRequestFilter.class);
         register(PostRequestFilter.class);
-
-
+        register(JerseyApiDeclarationProvider.class);
+        register(JerseyResourceListingProvider.class);
+        register(ApiListingResourceJSON.class);
         packages(metaData.getResourcePackageName());
         beanConfiguration(metaData);
+        EpikosApiToSwaggerApiDocGenerator.constructSwaggerApiDoc(apiList);
     }
 
     /**
@@ -123,28 +111,30 @@ public  class ServiceResourceConfig extends ResourceConfig {
 
         @Override
         public void filter(ContainerRequestContext creq, ContainerResponseContext cres) {
-            cres.getHeaders().add("Access-Control-Allow-Origin", "");
-            cres.getHeaders().add("Access-Control-Allow-Headers", "");
-            cres.getHeaders().add("Access-Control-Allow-Credentials", "");
-            cres.getHeaders().add("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT");
-            cres.getHeaders().add("Access-Control-Max-Age", "");
             cres.getHeaders().add("Access-Control-Allow-Origin", "*");
+            cres.getHeaders().add("Access-Control-Allow-Headers", "Content-Type, api_key, Authorization");
+            cres.getHeaders().add("Access-Control-Allow-Credentials", "");
+            cres.getHeaders().add("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT, PATCH, OPTIONS");
+            cres.getHeaders().add("Access-Control-Max-Age", "");
         }
     }
 
+    /***
+     * Function to integrate swagger api doc . The server uri + /api-docs provide the detail of swagger for api
+     * ToDo:  at this time it is not working properly and need fix !
+     * @param metaData
+     */
     public static void beanConfiguration(IServiceMetaData metaData){
         BeanConfig beanConfig = new BeanConfig();
         beanConfig.setVersion("1.0");
-        beanConfig.setScan(true);
-        if(metaData.getResourcePackageName() != null) {
-            for (String resourcePackage : metaData.getResourcePackageName()) {
-                beanConfig.setResourcePackage(resourcePackage);
-            }
-        }
-        beanConfig.setResourcePackage(Service.class.getPackage().getName());
+
+        beanConfig.setResourcePackage("");
         beanConfig.setBasePath(metaData.getServiceURI());
-        beanConfig.setDescription("Resources");
-        beanConfig.setTitle("Apis");
+        beanConfig.setDescription("The following document shows list API(s) that has been configured and will get handled by the service");
+        beanConfig.setTitle("Document : List of API(s)");
+        beanConfig.setScan(true);
+        //System.out.println("base path " +beanConfig.getBasePath());
+        //System.out.println("resource package " +beanConfig.getResourcePackage());
     }
 
     private Resource scanAndBuildResources(final Api drmetaData){
@@ -210,20 +200,80 @@ public  class ServiceResourceConfig extends ResourceConfig {
             }
             config.setApiList(concretApiList);
         }
+
+        testYaml();
         return config;
+    }
+
+    //ToDo: remove this code
+    private void testYaml(){
+        System.out.println("+++++++++++++++++++++++++++++++ Test Yml ++++++++++++++++++++++++++++++++++\n");
+        Map<String, String> map = new HashMap<String, String>();
+        map.put("name", "Pushkin");
+        Yaml yaml = new Yaml();
+        String output = yaml.dump(map);
+        //System.out.println(output);
+
+        List<Api> apiList = new ArrayList();
+
+        Api api = new Api();
+        api.setConsume("Consume JSON");
+        api.setPath("/test/yml");
+        List<ApiResponse> apiResponseList = new ArrayList();
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setMessage("Test api msg");
+        apiResponse.setResponse("test rep");
+        apiResponseList.add(apiResponse);
+         apiResponse = new ApiResponse();
+        apiResponse.setMessage("Test api msg 1");
+        apiResponse.setResponse("test rep 1");
+        apiResponseList.add(apiResponse);
+
+        api.setResponseList(apiResponseList);
+        apiList.add(api);
+
+
+        api = new Api();
+        api.setConsume("Consume XML");
+        api.setPath("/test/xml");
+         apiResponseList = new ArrayList();
+         apiResponse = new ApiResponse();
+        apiResponse.setMessage("Test api msg 11");
+        apiResponse.setResponse("test rep11");
+        apiResponseList.add(apiResponse);
+        apiResponse = new ApiResponse();
+        apiResponse.setMessage("Test api msg 22");
+        apiResponse.setResponse("test rep 22");
+        apiResponseList.add(apiResponse);
+
+        api.setResponseList(apiResponseList);
+        apiList.add(api);
+
+
+        output = yaml.dump(apiList);
+        System.out.println(output);
+
+
     }
 
     private void buildAndRegisterDynamicResource(List<Api> apiList,String serviceURI) throws EpikosException{
         ResourceDocumentBuilder resourceDocumentBuilder = new ResourceDocumentBuilder();
         List<Resource> validResourceList = new ArrayList<>();
         if(apiList != null) {
-            Resource resource = null;
+            Resource resource;
             for (Api api : apiList) {
 
                 if (validateDynamicResource(api, resourceDocumentBuilder)) {
                     resource = scanAndBuildResources(api);
                     validResourceList.add(resource);
                     registerResources(resource);
+
+                    //we will register package of each controller so that Jersey can route the request to this controller !
+                    String fqdnController = api.getController();
+                    if(fqdnController!= null) {
+                        int indexOfClassNameStaringPoint = fqdnController.lastIndexOf('.');
+                        packages(fqdnController.substring(0,indexOfClassNameStaringPoint));
+                    }
                     //We will construct spoof end point for same api
                     //Will check if the end point created is already a Spoof api or not. If yes then we will not create
                     //spoof api . Also will check whether spoof response (JSON file) has been provided or not.

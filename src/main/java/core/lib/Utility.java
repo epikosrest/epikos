@@ -272,6 +272,15 @@ public final class Utility {
 
     }
 
+	public static boolean isValidClass(String className) {
+		try {
+			Class classToVerify = verifyAndReturnResourceClass(className);
+			return classToVerify == null ? false : true;
+		}catch (ClassNotFoundException classNotFoundExp){
+			return false;
+		}
+	}
+
 	private static Class verifyAndReturnResourceClass(String className) throws ClassNotFoundException{
 		Class classToVerify = null;
 		try {
