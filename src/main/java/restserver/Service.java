@@ -72,9 +72,9 @@ public class Service implements IService{
 	@Override
 	public final void start() throws Exception{
 		run();
-        logger.info("Press Enter to stop");
+        //logger.info("Press Enter to stop");
 		System.in.read();
-		stop();
+		//stop();
 
 	}
 
