@@ -53,13 +53,8 @@ public class Service implements IService{
 
 	public static void main(String[] args) throws Exception {
 
-        try {
-            Service service = new Service();
-            service.start();
-        }catch (Exception exp){
-            System.out.println("Service crashed : " + exp.getMessage());
-            exp.printStackTrace();
-        }
+		Service service = new Service();
+		service.start();
 
 	}
 
@@ -77,9 +72,9 @@ public class Service implements IService{
 	@Override
 	public final void start() throws Exception{
 		run();
-        //logger.info("Press Enter to stop");
+        logger.info("Press Enter to stop");
 		System.in.read();
-		//stop();
+		stop();
 
 	}
 
