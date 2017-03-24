@@ -53,8 +53,13 @@ public class Service implements IService{
 
 	public static void main(String[] args) throws Exception {
 
-		Service service = new Service();
-		service.start();
+        try {
+            Service service = new Service();
+            service.start();
+        }catch (Exception exp){
+            System.out.println("Service crashed : " + exp.getMessage());
+            exp.printStackTrace();
+        }
 
 	}
 
