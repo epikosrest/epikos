@@ -64,16 +64,15 @@ public class Service implements IService{
         Configuration config = loadConfigurationProperties();
         IServiceMetaData metaData = loadMetaData(config);
         ServiceResourceConfig resource = new ServiceResourceConfig(metaData);
-        startServer(metaData.getServiceURI(),resource);
-        printServiceStatus(metaData.getServiceName(),metaData.getServiceURI());
+        startServer(metaData.getServiceURI(),resource,metaData.getServiceName());
+
 	}
 
 
 	@Override
 	public final void start() throws Exception{
 		run();
-        logger.info("Press Enter to stop");
-		System.in.read();
+
 		stop();
 
 	}
@@ -106,7 +105,7 @@ public class Service implements IService{
         return metaData;
     }
 
-    private void startServer(String serviceURI, ResourceConfig resource) throws IOException{
+    private void startServer(String serviceURI, ResourceConfig resource,String serviceName) throws IOException{
 
         //String[] pack = {"controller", "com.wordnik.swagger.jersey.listing"};
         //resource.packages(pack);
@@ -141,7 +140,25 @@ public class Service implements IService{
                 new StaticHttpHandler("src/main/resources/swagger-ui/"), "/docs/");
 
 
-        grizzlyServer.start();
+        // register shutdown hook : This requirement came to support dockerization of service.
+        // Without this hook the service will stop right away while running in docker container
+        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+            @Override
+            public void run() {
+                logger.info("Stopping server..");
+                grizzlyServer.stop();
+            }
+        }, "shutdownHook"));
+
+        try {
+            grizzlyServer.start();
+            printServiceStatus(serviceName,serviceURI);
+            logger.info("Press Ctrl+C to stop");
+            Thread.currentThread().join();
+            System.in.read();
+        }catch (Exception exp){
+            logger.error(String.format("Grizzly Server failed to start because of error %s",exp.getMessage()));
+        }
 
     }
 
@@ -152,7 +169,7 @@ public class Service implements IService{
         String serverAddressLine = serviceName + " is up and running";
         logger.info("***** "+serverAddressLine +
 				" *****\n***** " + serviceURI + " *****" +
-				" *****\n***** " + serviceURI + "docs" + " *****" + " for api documentation");
+				" *****\n***** " + serviceURI + "docs/" + " *****" + " for api documentation");
         logger.info("*************************************************************************************************\n\n");
     }
 

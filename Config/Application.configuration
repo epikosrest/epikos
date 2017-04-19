@@ -2,7 +2,7 @@
 service.name=EpikosRestService
 
 #Port number to use
-#port=8081
+port=8080
 
 #Multiple resources can be included using ; delimeter. This value indicates where to look for rest resources
 resource.package.name=example.controller;

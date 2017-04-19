@@ -113,7 +113,7 @@ final public class ServiceMetaData implements  IServiceMetaData{
                 config.getProperties().getProperty("port"):System.getenv("PORT") != null?
                 System.getenv("PORT"): DEFAULT_PORT_NUMBER;
 
-        hostName = InetAddress.getLocalHost().getHostName();
+        hostName = "localhost";//InetAddress.getLocalHost().getHostName();
         //portNumber = portNumber==null?DEFAULT_PORT_NUMBER:portNumber;
         serviceName = config.getProperties().getProperty("service.name") == null ?DEFAULT_SERVICE_NAME:config.getProperties().getProperty("service.name");
         resourcePackageName = config.getProperties().getProperty("resource.package.name") == null?
