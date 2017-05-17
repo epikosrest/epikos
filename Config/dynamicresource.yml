@@ -12,7 +12,7 @@ apiList:
     path: test/hello
     method: GET
     status: OK
-    response: example.Response
+    response: example.response.Response
     response: spoof/test_response.json
     controller: example.dynamic_controller.DynamicHelloController
   - consume: application/json
@@ -20,7 +20,7 @@ apiList:
     path: swagger/doc1
     method: GET
     status: OK
-    response: example.Response
+    response: example.response.Response
     response: spoof/test_response.json
     controller: example.dynamic_controller.DynamicHelloController
   - consume: application/json
@@ -28,11 +28,12 @@ apiList:
     path: swagger/doc2
     method: GET
     status: OK
-    response: example.Response
+    response: example.response.Response
     response: spoof/test_response.json
     controller: example.dynamic_controller.DynamicHelloController
     responseList:
-      - {status: 404, message: not found, response: example.Response}
+      - {status: 404, message: not found, response: example.response.Response.class}
+      - {status: 400, message: bad request, response: example.response.Response.class}
 #  - consume: application/json
 #    produce: application/json
 #    path: test/hello

@@ -1,6 +1,7 @@
 package external.swagger;
 
 import core.dynamic.resources.Api;
+import core.dynamic.resources.ApiResponse;
 
 import java.util.List;
 
@@ -47,9 +48,15 @@ public class EpikosApiToSwaggerApiDocGenerator {
         final static String path = "@Path(\"%s\")";
         final static String produce = "@Produces(\"%s\")";
         final static String apiOperation = "@ApiOperation";
+        final static String apiResponsesTag = "@ApiResponses";
+        final static String apiResponseTag = "@ApiResponse(code = %s, message = \"%s\", response = %s)";
+        final static String apiResponsesValue = "value = ";
         final static String apiOperationValue ="value = \"%s\"";
         final static String apiOperationNotes = ",notes = \"%s\"";
         final static String getApiOperationResposne = ",response = %s";
+        final static String apiResponseCode = "code = %s";
+        final static String apiResponseMessage = ", message %s";
+        final static String apiResponse = "response = %s";
 
         final static String apiRespnose = "@ApiResponses(value = {\n" +
                 "            @ApiResponse(code = 400, message = \"Invalid ID supplied 1\", response = EpikosError.class),\n" +
@@ -59,6 +66,7 @@ public class EpikosApiToSwaggerApiDocGenerator {
         final static String closeCurly = "}";
         final static String openBracket = "(";
         final static String closeBracket = ")";
+        final static String comma = ",";
 
         final static String methodBody = "public void process%s() {\n}";
 
@@ -69,6 +77,7 @@ public class EpikosApiToSwaggerApiDocGenerator {
         }
 
         StringBuilder classStrcture = createClassSkleton("SwaggerApiDocumentation");
+        classStrcture.append(LineBreaker);
         int iteration = 0;
         for(Api api : epikosApi){
             classStrcture.append(LineBreaker);
@@ -85,6 +94,7 @@ public class EpikosApiToSwaggerApiDocGenerator {
             classStrcture.append(String.format(getApiOperationResposne,"Response.class"));
             classStrcture.append(closeBracket);
             classStrcture.append(LineBreaker);
+            addResponseListForAPISwaggerDocumetation(api.getResponseList(),classStrcture);
             classStrcture.append(String.format(methodBody,iteration));
 
             classStrcture.append("\n");
@@ -118,6 +128,30 @@ public class EpikosApiToSwaggerApiDocGenerator {
         classContstruct.append(String.format(classDefenition,className));
         classContstruct.append(openCurly);
         return classContstruct;
+    }
+
+    private static void addResponseListForAPISwaggerDocumetation(List<ApiResponse> apiResponses,StringBuilder classStructure){
+        if(!(apiResponses == null || apiResponses.isEmpty())){
+            classStructure.append(apiResponsesTag);
+            classStructure.append(openBracket);
+            classStructure.append(apiResponsesValue);
+            classStructure.append(openCurly);
+            classStructure.append(LineBreaker);
+
+            int countResponse =1;
+            for(ApiResponse apiResponse : apiResponses){
+                classStructure.append(String.format(apiResponseTag,apiResponse.getStatus(),apiResponse.getMessage(),apiResponse.getResponse()));
+                if(countResponse++<apiResponses.size()) {
+                    classStructure.append(comma);
+                }
+                classStructure.append(LineBreaker);
+
+            }
+            classStructure.append(closeCurly);
+            classStructure.append(closeBracket);
+            classStructure.append(LineBreaker);
+
+        }
     }
 
     private static void appendMethod(String method,StringBuilder methodAttribute){

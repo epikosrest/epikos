@@ -25,7 +25,7 @@ SOFTWARE.>
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.nepaliapps</groupId>
 	<artifactId>EpikosRestService</artifactId>
-	<version>0.0.7.1</version>
+	<version>0.0.7.3</version>
 	<name>Epikos</name>
     <description>Epikos is a Rest Serivce framework which can be extend to develop any other Rest API/Services. For more
     detail please checkout github (https://github.com/epikosrest/epikos.git)</description>
@@ -121,6 +121,7 @@ SOFTWARE.>
         <dependency>
             <groupId>net.openhft</groupId>
             <artifactId>chronicle</artifactId>
+			<scope>compile</scope>
             <version>3.6.4</version>
         </dependency>
 
@@ -203,6 +204,7 @@ SOFTWARE.>
 						</lifecycleMappingMetadata>
 					</configuration>
 				</plugin>
+
 			</plugins>
 
 		</pluginManagement>

@@ -54,5 +54,7 @@ public class ApiFactory {
         destinationApi.setResponseSpoof(sourceApi.getResponseSpoof());
         destinationApi.setServiceMode(sourceApi.getServiceMode());
         destinationApi.setStatus(sourceApi.getStatus());
+        destinationApi.setResponseList(sourceApi.getResponseList());
+
     }
 }
