@@ -278,7 +278,7 @@ public  class ServiceResourceConfig extends ResourceConfig {
                     //Will check if the end point created is already a Spoof api or not. If yes then we will not create
                     //spoof api . Also will check whether spoof response (JSON file) has been provided or not.
                     // If not then will skip
-                    if(api.getServiceMode() != ServiceMode.SPOOF){
+                    if(api.getServiceMode() != ServiceMode.SPOOF && api.getResponseSpoof() != null){
                         Api spoofApi = new SpoofApi();
                         spoofApi.setConsume(api.getConsume());
                         spoofApi.setMethod(api.getMethod());

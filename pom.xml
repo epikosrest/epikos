@@ -25,7 +25,7 @@ SOFTWARE.>
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.nepaliapps</groupId>
 	<artifactId>EpikosRestService</artifactId>
-	<version>0.0.7.3</version>
+	<version>0.0.7.4</version>
 	<name>Epikos</name>
     <description>Epikos is a Rest Serivce framework which can be extend to develop any other Rest API/Services. For more
     detail please checkout github (https://github.com/epikosrest/epikos.git)</description>
@@ -257,16 +257,32 @@ SOFTWARE.>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
-				<version>2.4</version>
 				<executions>
 					<execution>
 						<id>copy-dependencies</id>
-						<phase>package</phase>
+						<phase>prepare-package</phase>
 						<goals>
 							<goal>copy-dependencies</goal>
 						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/${project.build.finalName}.lib</outputDirectory>
+						</configuration>
 					</execution>
 				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifest>
+							<addClasspath>true</addClasspath>
+							<classpathPrefix>${project.build.finalName}.lib/</classpathPrefix>
+							<mainClass>restserver.Service</mainClass>
+						</manifest>
+					</archive>
+				</configuration>
 			</plugin>
 
 			<plugin>
