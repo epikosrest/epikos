@@ -27,6 +27,7 @@ public class Api{
     String responseSpoof;
     ServiceMode serviceMode;
     List<ApiResponse> responseList = new ArrayList();
+    List<ApiParam> apiParamList = new ArrayList();
 
 
     /***

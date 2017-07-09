@@ -43,10 +43,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Iterator;
-import java.util.Properties;
-import java.util.TreeSet;
+import java.util.*;
 
 public final class Utility {
 
@@ -306,5 +303,20 @@ public final class Utility {
         }
 
 		return classHasImplementedInterface;
+	}
+
+	public static ArrayList<String> parseAndGetToken(String dataToParase){
+		String[] params = null;
+		ArrayList<String> paramList = new ArrayList<>();
+		if (dataToParase != null){
+			//Parse path and get list of path param
+			params = dataToParase.split("\\{");
+			for(String p : params){
+				if(p.contains("}")){
+					paramList.add(p.replace("}",StringUtils.EMPTY));
+				}
+			}
+		}
+		return paramList;
 	}
 }

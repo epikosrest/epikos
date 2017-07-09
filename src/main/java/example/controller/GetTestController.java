@@ -1,9 +1,6 @@
 package example.controller;
 
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiResponse;
-import com.wordnik.swagger.annotations.ApiResponses;
+import com.wordnik.swagger.annotations.*;
 import core.dynamic.resources.IDynamicRequestGET;
 import core.dynamic.resources.IDynamicResourceControllerGet;
 import core.error.EpikosError;
@@ -14,6 +11,7 @@ import example.response.Response;
 import javax.annotation.Resource;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
@@ -26,7 +24,7 @@ public class GetTestController{
 
     //@Override
     @GET
-    @Path("test1")
+    @Path("test1/{userid}")
     @Produces(MediaType.APPLICATION_JSON)
 
     @ApiOperation(value = "A test1 operation", notes = "More notes about this method 1", response = Response.class)
@@ -34,7 +32,7 @@ public class GetTestController{
             @ApiResponse(code = 400, message = "Invalid ID supplied 1",response= EpikosError.class),
             @ApiResponse(code = 500, message = "Server is down! 1",response = EpikosError.class)
     })
-    public Response process(IDynamicRequestGET dynamicRequest) throws EpikosException {
+    public Response process(@ApiParam(value = "user id") @PathParam("userid") String userid, IDynamicRequestGET dynamicRequest) throws EpikosException {
         Response res =  new Response();
         res.setTest("first response 1");
         return res;
