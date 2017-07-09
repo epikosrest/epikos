@@ -139,6 +139,11 @@ public final class Utility {
 	}
 
 	public static boolean isResourceAJSONObject(String resourceData){
+
+		if(resourceData == null){
+			return false;
+		}
+
 		try {
 			final String fileSeparator = System.getProperty("file.separator");
 			final String baseDir = System.getProperty("user.dir");

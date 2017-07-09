@@ -108,9 +108,13 @@ final public class ServiceMetaData implements  IServiceMetaData{
         if(config == null || config.getProperties()==null){
             throw new RuntimeException("Configuration must not be null. Please check the configuration file is present and properly configured");
         }
-        String portNumber = config.getProperties().getProperty("port");
-        hostName = InetAddress.getLocalHost().getHostName();
-        portNumber = portNumber==null?DEFAULT_PORT_NUMBER:portNumber;
+        String portNumber =
+                config.getProperties().getProperty("port")!=null?
+                config.getProperties().getProperty("port"):System.getenv("PORT") != null?
+                System.getenv("PORT"): DEFAULT_PORT_NUMBER;
+
+        hostName = "localhost";//InetAddress.getLocalHost().getHostName();
+        //portNumber = portNumber==null?DEFAULT_PORT_NUMBER:portNumber;
         serviceName = config.getProperties().getProperty("service.name") == null ?DEFAULT_SERVICE_NAME:config.getProperties().getProperty("service.name");
         resourcePackageName = config.getProperties().getProperty("resource.package.name") == null?
                                 null:config.getProperties().getProperty("resource.package.name").split(";");

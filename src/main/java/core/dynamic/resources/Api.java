@@ -43,23 +43,23 @@ public class Api{
 
     /***
      * This is to validate whether the Api signature qualify for exceptional case or not
-     * For example if all three i.e. controller, request and response class are not provided and is empty then we don't care and
+     * For example if all three controller, request and response class are not provided and is empty then we don't care and
      * just register resource as is
-     * If controller is not provided but request and response is then we will continue by registering resource as is where for
+     * If controller is not provided but request and response is, then we will continue by registering resource as is where for
      * any request coming to the endpoint will be have response as provided
      * @return
      */
     public boolean isExceptionalCase(){
-        if(controller == null && request == null && response == null){
+        if(controller == null && request == null && response == null && responseSpoof == null){
             return true;
             //This is to support Spoof mode or Spoof functionality
         }else if(controller == null &&
-                response != null
+                (response != null || responseSpoof !=null)
                 ){
             //Will only support JSON
             //ToDo add support for any other format like XML etc
-            if(Utility.isResourceAJSONObject(response)) {
-                setResponseSpoof(Utility.readFile(response));
+            if(Utility.isResourceAJSONObject(response == null?responseSpoof:response)) {
+                setResponseSpoof(Utility.readFile(response == null?responseSpoof:response));
                 setServiceMode(ServiceMode.SPOOF);
                 return true;
             }

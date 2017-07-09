@@ -61,8 +61,8 @@ public class EpikosApiToSwaggerApiDocGenerator {
         final static String apiOperation = "@ApiOperation";
         final static String apiResponsesTag = "@ApiResponses";
         final static String apiResponseTag = "@ApiResponse(code = %s, message = \"%s\", response = %s)";
-        final static String apiParam =  "@ApiParam(value=\"%s\")";
 
+        final static String apiParam =  "@ApiParam(value=\"%s\")";
         final static String apiResponsesValue = "value = ";
         final static String apiOperationValue ="value = \"%s\"";
         final static String apiOperationNotes = ",notes = \"%s\"";
@@ -111,6 +111,7 @@ public class EpikosApiToSwaggerApiDocGenerator {
             //classStrcture.append(String.format(methodBody,iteration,StringUtils.EMPTY));
             //Update method parameter (if nothing has been provided as path param i.e. {path param} then will remove %s and leave it empty
             updateMethodParamWithSwaggerApiParamAnnotation(iteration,api.getPath(),api.getApiParamList(),classStrcture);
+            classStrcture.append(String.format(methodBody,iteration));
 
             classStrcture.append("\n");
             iteration++;
@@ -168,7 +169,7 @@ public class EpikosApiToSwaggerApiDocGenerator {
 
         }
     }
-
+  
     private static void updateMethodParamWithSwaggerApiParamAnnotation(int iteration,String apiPath, List<core.dynamic.resources.ApiParam> apiParameterList, StringBuilder method) {
 
         /*String[] params = null;

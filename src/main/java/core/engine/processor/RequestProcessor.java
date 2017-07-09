@@ -46,7 +46,7 @@ public abstract class RequestProcessor {
     protected void verifyStatusIsSupportedForTheMethod(List<Status> supportedStatusList, Integer statusCode){
         //We will log error if status code is not supported
         if(!supportedStatusList.stream().anyMatch(p->p.getStatus()==statusCode)){
-            logger.error(String.format("Panic: Status code %s is not supported hence status OK will be returned. Please verify status code is supported for PUT method !"));
+            logger.error("Panic: Status code %s is not supported hence status OK will be returned. Please verify status code is supported for PUT method !");
         }
     }
 
