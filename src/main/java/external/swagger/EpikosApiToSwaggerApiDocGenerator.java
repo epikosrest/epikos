@@ -2,7 +2,12 @@ package external.swagger;
 
 import core.dynamic.resources.Api;
 import core.dynamic.resources.ApiResponse;
+import core.lib.Utility;
+import io.swagger.annotations.ApiParam;
+import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 /**
@@ -24,10 +29,12 @@ public class EpikosApiToSwaggerApiDocGenerator {
                 "import com.wordnik.swagger.annotations.ApiOperation;\n" +
                 "import com.wordnik.swagger.annotations.ApiResponse;\n" +
                 "import com.wordnik.swagger.annotations.ApiResponses;\n" +
+                "import com.wordnik.swagger.annotations.ApiParam;\n" +
                 "import core.error.EpikosError;\n" +
                 "import example.response.Response;\n" +
                 "import javax.ws.rs.Path;\n" +
                 "import javax.ws.rs.Produces;\n" +
+                "import javax.ws.rs.PathParam;\n" +
                 "import javax.ws.rs.core.MediaType;";
 
         final static String IMPORT_GET = "\n" + "import javax.ws.rs.GET;\n";
@@ -47,9 +54,15 @@ public class EpikosApiToSwaggerApiDocGenerator {
 
         final static String path = "@Path(\"%s\")";
         final static String produce = "@Produces(\"%s\")";
+
+        //ToDo: prabably we don't need path param annotation as here we will be generating template class only
+        //final static String pathParam = "@PathParam(\"%s\")";
+
         final static String apiOperation = "@ApiOperation";
         final static String apiResponsesTag = "@ApiResponses";
         final static String apiResponseTag = "@ApiResponse(code = %s, message = \"%s\", response = %s)";
+
+        final static String apiParam =  "@ApiParam(value=\"%s\")";
         final static String apiResponsesValue = "value = ";
         final static String apiOperationValue ="value = \"%s\"";
         final static String apiOperationNotes = ",notes = \"%s\"";
@@ -68,7 +81,7 @@ public class EpikosApiToSwaggerApiDocGenerator {
         final static String closeBracket = ")";
         final static String comma = ",";
 
-        final static String methodBody = "public void process%s() {\n}";
+        final static String methodBody = "public void process%s(%s) {\n}";
 
     public static void constructSwaggerApiDoc(List<Api> epikosApi){
         if(epikosApi == null || epikosApi.size() ==0){
@@ -95,6 +108,9 @@ public class EpikosApiToSwaggerApiDocGenerator {
             classStrcture.append(closeBracket);
             classStrcture.append(LineBreaker);
             addResponseListForAPISwaggerDocumetation(api.getResponseList(),classStrcture);
+            //classStrcture.append(String.format(methodBody,iteration,StringUtils.EMPTY));
+            //Update method parameter (if nothing has been provided as path param i.e. {path param} then will remove %s and leave it empty
+            updateMethodParamWithSwaggerApiParamAnnotation(iteration,api.getPath(),api.getApiParamList(),classStrcture);
             classStrcture.append(String.format(methodBody,iteration));
 
             classStrcture.append("\n");
@@ -151,6 +167,57 @@ public class EpikosApiToSwaggerApiDocGenerator {
             classStructure.append(closeBracket);
             classStructure.append(LineBreaker);
 
+        }
+    }
+  
+    private static void updateMethodParamWithSwaggerApiParamAnnotation(int iteration,String apiPath, List<core.dynamic.resources.ApiParam> apiParameterList, StringBuilder method) {
+
+        /*String[] params = null;
+        LinkedHashMap<String,String> paramList = new LinkedHashMap<>();
+        if (apiPath != null){
+            //Parse path and get list of path param
+            params = apiPath.split("\\{");
+        }*/
+        ArrayList<String> params = Utility.parseAndGetToken(apiPath);
+
+        if(params != null && params.size()>0){
+
+            if(!apiParameterList.isEmpty()) {
+                updateMethodParam(iteration,apiPath,apiParameterList,method,true);
+            }else{
+                for(String p : params){
+                    core.dynamic.resources.ApiParam apiParam = new core.dynamic.resources.ApiParam();
+
+                    apiParam.setParam(p);
+
+                    apiParameterList.add(apiParam);
+                }
+                updateMethodParam(iteration,apiPath,apiParameterList,method,false);
+            }
+        }else{
+            method.append(String.format(methodBody, iteration,StringUtils.EMPTY));
+        }
+
+    }
+
+    private static void updateMethodParam(int iteration,String apiPath,List<core.dynamic.resources.ApiParam> apiParameterList,StringBuilder method,boolean addApiSwaggerDesc){
+        StringBuilder apiParamToReplace = new StringBuilder();
+        String methodParam = String.format(methodBody, iteration, "#param#");
+        for (core.dynamic.resources.ApiParam apiParameter : apiParameterList) {
+            if (apiPath.contains("{" + apiParameter.getParam() + "}")) {
+                if(addApiSwaggerDesc) {
+                    apiParamToReplace.append(methodParam.replace("#param#", String.format(apiParam, apiParameter.getValue()) + " @PathParam(\"" + apiParameter.getParam() + "\")" + " String " + apiParameter.getParam()));
+                }else{
+                    apiParamToReplace.append(methodParam.replace("#param#", " @PathParam(\"" + apiParameter.getParam() + "\")" + " String " + apiParameter.getParam()));
+                }
+                apiParamToReplace.append(",");
+            }
+
+        }
+
+        if (apiParamToReplace.length() > 0) {
+            int lengthOfApiParam = apiParamToReplace.length() - 1;
+            method.append(apiParamToReplace.toString().substring(0, lengthOfApiParam));
         }
     }
 

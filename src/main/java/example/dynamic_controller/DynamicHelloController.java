@@ -4,6 +4,7 @@ import core.dynamic.resources.*;
 import core.exception.EpikosException;
 import example.request.HelloRequest;
 import example.response.HelloResponse;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.ws.rs.core.MultivaluedMap;
 
@@ -29,7 +30,13 @@ public class DynamicHelloController implements IDynamicResourceController {
     public Object process(IDynamicRequestGET dynamicRequestGET) {
 
         HelloResponse getResponse = new HelloResponse();
-        getResponse.setResponseString("This is response entity for GET request from Swagger for Dynamic API example");
+        String testid = StringUtils.EMPTY;
+        if(!dynamicRequestGET.getPathParams().isEmpty() && dynamicRequestGET.getPathParams().get("doc1") != null){
+            testid = dynamicRequestGET.getPathParams().get("doc1").get(0);
+
+        }
+
+        getResponse.setResponseString("This is response entity for GET request from Swagger for Dynamic API example : value " + testid );
 
         return getResponse;
     }

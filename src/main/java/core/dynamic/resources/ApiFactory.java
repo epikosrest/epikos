@@ -55,6 +55,7 @@ public class ApiFactory {
         destinationApi.setServiceMode(sourceApi.getServiceMode());
         destinationApi.setStatus(sourceApi.getStatus());
         destinationApi.setResponseList(sourceApi.getResponseList());
+        destinationApi.setApiParamList(sourceApi.getApiParamList());
 
     }
 }
