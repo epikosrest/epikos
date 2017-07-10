@@ -111,7 +111,7 @@ public class EpikosApiToSwaggerApiDocGenerator {
             //classStrcture.append(String.format(methodBody,iteration,StringUtils.EMPTY));
             //Update method parameter (if nothing has been provided as path param i.e. {path param} then will remove %s and leave it empty
             updateMethodParamWithSwaggerApiParamAnnotation(iteration,api.getPath(),api.getApiParamList(),classStrcture);
-            classStrcture.append(String.format(methodBody,iteration));
+            //classStrcture.append(String.format(methodBody,iteration));
 
             classStrcture.append("\n");
             iteration++;
