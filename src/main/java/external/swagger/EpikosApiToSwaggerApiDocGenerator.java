@@ -172,12 +172,6 @@ public class EpikosApiToSwaggerApiDocGenerator {
   
     private static void updateMethodParamWithSwaggerApiParamAnnotation(int iteration,String apiPath, List<core.dynamic.resources.ApiParam> apiParameterList, StringBuilder method) {
 
-        /*String[] params = null;
-        LinkedHashMap<String,String> paramList = new LinkedHashMap<>();
-        if (apiPath != null){
-            //Parse path and get list of path param
-            params = apiPath.split("\\{");
-        }*/
         ArrayList<String> params = Utility.parseAndGetToken(apiPath);
 
         if(params != null && params.size()>0){

@@ -318,7 +318,9 @@ public final class Utility {
 			params = dataToParase.split("\\{");
 			for(String p : params){
 				if(p.contains("}")){
-					paramList.add(p.replace("}",StringUtils.EMPTY));
+					int indexOfClosingBracket = p.indexOf('}');
+
+					paramList.add(p.substring(0,indexOfClosingBracket));
 				}
 			}
 		}
