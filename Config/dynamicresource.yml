@@ -10,7 +10,7 @@ apiList:
     status: OK
   - consume: application/json
     produce: application/json
-    path: test/{testid}/hello
+    path: test/{testid}/hello/{helloid}
     method: GET
     status: OK
     response: example.response.Response
@@ -20,6 +20,7 @@ apiList:
     #e.g. in this example param testid description has been provided as "test id" so that it can display in swagger
     apiParamList:
       - {param: testid, value: test id}
+      - {param: helloid, value: hello id}
     responseList:
           - {status: 404, message: not found, response: example.response.Response.class}
           - {status: 400, message: bad request, response: example.response.Response.class}

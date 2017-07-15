@@ -34,7 +34,7 @@ public class ApiFactory {
                 copyProperties(api,returnApi);
                 break;
             default:
-                if(!Utility.doesResourceTypeImplementInterfaceListed(api.getMethod(),IMethod.class.getTypeName())) {
+                if(!Utility.hasResourceTypeImplementInterfaceListed(api.getMethod(),IMethod.class.getTypeName())) {
                     throw new EpikosException(String.format("Invalid method type %s", api.getMethod()));
                 }
 
