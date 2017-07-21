@@ -14,17 +14,18 @@ import javax.ws.rs.core.MultivaluedMap;
 public class DynamicHelloController implements IDynamicResourceController {
 
     public Object process(IDynamicRequestPOST dynamicRequest) throws EpikosException {
-        try {
+        //try {
             HelloRequest helloRequest = dynamicRequest.getRequest(HelloRequest.class);
             MultivaluedMap<String, String> pathParam = dynamicRequest.getPathParams();
 
             HelloResponse resp = new HelloResponse();
             resp.setResponseString("Hello " + helloRequest.getName());
             return resp;
-        }catch (Exception ioExp){
+        //}catch (Exception ioExp){
+        //    System.out.println(ioExp.getMessage());
             //ToDo: log and return proper error msg
-        }
-        return  null;  //ToDO: need better way to handle and return value
+        //}
+        //return  null;  //ToDO: need better way to handle and return value
     }
 
     public Object process(IDynamicRequestGET dynamicRequestGET) {

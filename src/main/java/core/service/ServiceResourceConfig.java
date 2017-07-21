@@ -36,7 +36,6 @@ import core.intereceptor.ResponseWriterInterceptor;
 import core.lib.Utility;
 import core.service.handler.RequestHandler;
 import external.swagger.EpikosApiToSwaggerApiDocGenerator;
-import external.swagger.SwaggerApiTemplateLoader;
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.moxy.json.MoxyJsonConfig;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -320,7 +319,7 @@ public  class ServiceResourceConfig extends ResourceConfig {
     private boolean validateDynamicResource(Api api ,ResourceDocumentBuilder resourceDocumentBuilder) throws EpikosException{
 
         //Will check some of mandatory attribute for api e.g. status, method and path and make sure all attributes are valid before proceeding for next step
-        if(!api.isValid()){
+        if(!api.isValid().isValidStatus()){
             buildInvalidInformation(api, resourceDocumentBuilder);
             return false;
         }
@@ -328,7 +327,7 @@ public  class ServiceResourceConfig extends ResourceConfig {
         //if(isExceptionalCase(api)){
         if(api.isExceptionalCase()){
 
-            if(!Utility.isValidMethod(api.getMethod()) || !Utility.isValidPath(api.getPath())) {
+            if(!Utility.isValidMethod(api.getMethod()).isValidStatus() || !Utility.isValidPath(api.getPath()).isValidStatus()) {
                 buildInvalidInformation(api,resourceDocumentBuilder);
                 return false;
             }
@@ -406,18 +405,12 @@ public  class ServiceResourceConfig extends ResourceConfig {
 
     private void buildInvalidInformation(Api api ,ResourceDocumentBuilder resourceDocumentBuilder){
 
-        String path = (StringUtils.isEmpty(api.getPath()) || StringUtils.isBlank(api.getPath()))?"(path has not defined)":api.getPath();
-        String method = (StringUtils.isEmpty(api.getMethod()) || StringUtils.isBlank(api.getMethod()))?"(method has not defined)":api.getMethod();
-        String consume = (StringUtils.isEmpty(api.getConsume()) || StringUtils.isBlank(api.getConsume()))?"(consume content type has not defined)":api.getConsume();
-        String produce = (StringUtils.isEmpty(api.getProduce()) || StringUtils.isBlank(api.getProduce()))?"(produce content type has not defined)":api.getProduce();
-        String status = (StringUtils.isEmpty(api.getStatus()) || StringUtils.isBlank(api.getStatus()))?"(status content type has not defined)":api.getStatus();
+        try{
+            resourceDocumentBuilder.addResourceInvalidInformation(String.format("Failed to create resource, please fix following issue %s",api.isValid().getDescription()));
+        }catch (EpikosException epicExp){
 
-        resourceDocumentBuilder.addResourceInvalidInformation(String.format("Failed to create resource path: %s , supported verb: %s , consumed media type: %s, produce media type: %s , status code: %s",
-                path,
-                method,
-                consume,
-                produce,
-                status));
+            logger.error("Unable to build invalid information \n" +epicExp.getMessage());
+        }
     }
 
 

@@ -1,8 +1,10 @@
 package core.dynamic.resources;
 
 
+import core.domain.enums.ApiValidationStatusCode;
 import core.domain.enums.ServiceMode;
 import core.domain.enums.Status;
+import core.error.ApiValidationStatus;
 import core.exception.EpikosException;
 import core.lib.Utility;
 import lombok.Data;
@@ -36,8 +38,8 @@ public class Api{
      * @return
      * @throws EpikosException
      */
-    public boolean isValid() throws EpikosException{
-        return true;
+    public ApiValidationStatus isValid() throws EpikosException{
+        return new ApiValidationStatus(ApiValidationStatusCode.Valid);
     }
 
 

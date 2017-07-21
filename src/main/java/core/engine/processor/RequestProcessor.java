@@ -50,6 +50,7 @@ public abstract class RequestProcessor {
         }
     }
 
+    //ToDo: find a correct design to construct and return exception . This is not good way to handle it !
     protected Response constructErrorResponse(Exception exp,String mediaTypeToProduce){
 
         EpikosError error = new EpikosError();
@@ -61,7 +62,13 @@ public abstract class RequestProcessor {
             errorMessage = String.format("Invalid input data : %s", ((UnrecognizedPropertyException)exp).getPropertyName());
             status = Status.BADREQUEST;
 
-        }else {
+        }else if(exp instanceof com.fasterxml.jackson.databind.JsonMappingException || exp.getMessage().toLowerCase().contains("no content to map")){
+            errorMessage = "Bad request : empty request body is not allowed";
+            status = Status.BADREQUEST;
+            logger.error(exp.getMessage());
+
+        }
+        else {
 
             errorMessage = exp.getMessage();
             status = Status.INTERNALSERVERERROR;

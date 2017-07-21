@@ -5,6 +5,8 @@ import core.dynamic.resources.ApiResponse;
 import core.lib.Utility;
 import io.swagger.annotations.ApiParam;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -15,6 +17,8 @@ import java.util.List;
  * ToDo: Investigate and replace it with more elegant solution like using template e.g. freemarker or velocity framework
  */
 public class EpikosApiToSwaggerApiDocGenerator {
+
+    final static Logger logger =  LoggerFactory.getLogger(EpikosApiToSwaggerApiDocGenerator.class);
 
     final static StringBuilder classContstruct = new StringBuilder();
 
@@ -172,7 +176,7 @@ public class EpikosApiToSwaggerApiDocGenerator {
   
     private static void updateMethodParamWithSwaggerApiParamAnnotation(int iteration,String apiPath, List<core.dynamic.resources.ApiParam> apiParameterList, StringBuilder method) {
 
-        ArrayList<String> params = Utility.parseAndGetToken(apiPath);
+        ArrayList<String> params = Utility.parseAndGetPathParams(apiPath);
 
         if(params != null && params.size()>0){
 
@@ -197,21 +201,28 @@ public class EpikosApiToSwaggerApiDocGenerator {
     private static void updateMethodParam(int iteration,String apiPath,List<core.dynamic.resources.ApiParam> apiParameterList,StringBuilder method,boolean addApiSwaggerDesc){
         StringBuilder apiParamToReplace = new StringBuilder();
         String methodParam = String.format(methodBody, iteration, "#param#");
+        int numOfParam =0;
         for (core.dynamic.resources.ApiParam apiParameter : apiParameterList) {
+
             if (apiPath.contains("{" + apiParameter.getParam() + "}")) {
                 if(addApiSwaggerDesc) {
-                    apiParamToReplace.append(methodParam.replace("#param#", String.format(apiParam, apiParameter.getValue()) + " @PathParam(\"" + apiParameter.getParam() + "\")" + " String " + apiParameter.getParam()));
+                    apiParamToReplace.append(methodParam.replace("#param#", String.format(apiParam, apiParameter.getValue()) + " @PathParam(\"" + apiParameter.getParam() + "\")" + " String " + apiParameter.getParam() + ", #param#"));
                 }else{
-                    apiParamToReplace.append(methodParam.replace("#param#", " @PathParam(\"" + apiParameter.getParam() + "\")" + " String " + apiParameter.getParam()));
+                    apiParamToReplace.append(methodParam.replace("#param#", " @PathParam(\"" + apiParameter.getParam() + "\")" + " String " + apiParameter.getParam() + ", #param#"));
                 }
-                apiParamToReplace.append(",");
+                //apiParamToReplace.append(",");
+            }else{ //ToDo: log and display error that the api param list doesn't match with path param
+                logger.error(String.format("Path param mismatch with api param list ! Document has %s where as path has param %s",apiParameter,apiPath));
             }
 
+            methodParam = apiParamToReplace.toString();
+            apiParamToReplace = new StringBuilder();
         }
 
-        if (apiParamToReplace.length() > 0) {
-            int lengthOfApiParam = apiParamToReplace.length() - 1;
-            method.append(apiParamToReplace.toString().substring(0, lengthOfApiParam));
+        if (methodParam.contains(", #param#")) {
+            //String paramToReplace = apiParamToReplace.toString();
+            methodParam = methodParam.replace(", #param#",StringUtils.EMPTY);
+            method.append(methodParam.substring(0, methodParam.length()));
         }
     }
 

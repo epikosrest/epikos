@@ -26,14 +26,14 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.MappingJsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import core.domain.enums.ApiValidationStatusCode;
 import core.domain.enums.Method;
-import core.domain.enums.ServiceMode;
 import core.domain.enums.Status;
-import core.dynamic.resources.Api;
+import core.dynamic.resources.ApiParam;
 import core.dynamic.resources.IMethod;
 import core.dynamic.resources.ResourceDocumentBuilder;
+import core.error.ApiValidationStatus;
 import core.exception.EpikosException;
-import javassist.NotFoundException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +43,10 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public final class Utility {
 
@@ -160,9 +163,11 @@ public final class Utility {
 
 	}
 
-	public static boolean isValidStatusCode(String status) throws EpikosException{
+	public static ApiValidationStatus isValidStatusCode(String status) throws EpikosException{
+        ApiValidationStatus apiValidationStatus = new ApiValidationStatus(ApiValidationStatusCode.Valid);
+
 		if(StringUtils.isEmpty(status) || StringUtils.isBlank(status)){
-			return false;
+			return  new ApiValidationStatus(ApiValidationStatusCode.InvalidStatus,"Empty status code is not valid");
 		}
 
 		Integer statusCode = Status.getStatusCode(status);
@@ -171,56 +176,127 @@ public final class Utility {
 				Status statusToVerify = Status.valueOf(status);
 			}catch (Exception exp){
 				logger.error(exp.getMessage());
-				return false;
+				return  new ApiValidationStatus(ApiValidationStatusCode.InvalidStatus,String.format("Status code %s is not valid",status));
 			}
 
 		}
-		return true;
+		return apiValidationStatus;
 	}
 
-	public static boolean isValidMethod(String method){
-		boolean methodIsValid = doesMethodExist(method);
+	public static ApiValidationStatus isValidMethod(String method){
+        ApiValidationStatus methodIsValid = doesMethodExist(method);
         //Will check if it is a custom method or not
-        if(!methodIsValid){
-            methodIsValid = Utility.doesResourceTypeImplementInterfaceListed(method, IMethod.class.getTypeName());
+        if(!methodIsValid.getCode().equals(ApiValidationStatusCode.Valid)){
+            boolean isAValidCustomMethod = Utility.hasResourceTypeImplementInterfaceListed(method, IMethod.class.getTypeName());
+            if(!isAValidCustomMethod){
+                methodIsValid = new ApiValidationStatus(ApiValidationStatusCode.InvalidMethod,String.format("Method : %s is invalid as it has been defined as custom method but has not implemented interface IMethod",method));
+            }
         }
 
 		return methodIsValid;
 	}
 
-    private static boolean doesMethodExist(String method){
+    private static ApiValidationStatus doesMethodExist(String method){
 
         if(!(StringUtils.isEmpty(method) && StringUtils.isBlank(method))) {
             for (Method m : Method.values()) {
                 if (method.equalsIgnoreCase(m.name())) {
-                    return true;
+                    return new ApiValidationStatus(ApiValidationStatusCode.Valid);
                 }
             }
         }
-        return false;
+        return new ApiValidationStatus(ApiValidationStatusCode.InvalidMethod,String.format("Method : %s is invalid",method));
     }
 
-	public static boolean isValidPath(String path){
+	public static ApiValidationStatus isValidPath(String path){
 		if(StringUtils.isEmpty(path) || StringUtils.isBlank(path)){
-			return false;
+			return new ApiValidationStatus(ApiValidationStatusCode.InvalidPath,String.format("Empty Path is not valid"));
 		}
-		return true;
+		return new ApiValidationStatus(ApiValidationStatusCode.Valid);
 	}
 
 	/*
 	This method validate consume and produce filed of api. It can be either application/json or application/xml
 	 */
-	public static boolean isValidContentType(String contentType){
+	public static ApiValidationStatus isValidContentType(String contentType){
 
-		boolean valid = false;
 		if(StringUtils.isEmpty(contentType) || StringUtils.isBlank(contentType)){
-			return false;
+            return new ApiValidationStatus(ApiValidationStatusCode.InvalidContentType,String.format("Content type %s provided is not valid",contentType));
 		}else if("application/json".equalsIgnoreCase(contentType) || "application/xml".equalsIgnoreCase(contentType)){
-			valid = true;
+            return new ApiValidationStatus(ApiValidationStatusCode.Valid);
 		}
 
-		return valid;
+        return new ApiValidationStatus(ApiValidationStatusCode.InvalidContentType,String.format("Content type %s provided is not valid and is not supported",contentType));
+
 	}
+
+	public static ApiValidationStatus doesPathParamsMatchWithApiPathParam(String apiPath, List<ApiParam> apiParmList){
+
+		//If pathParms is null or empty then don't care for further validation
+        if(apiParmList == null || apiParmList.isEmpty()){
+            return new ApiValidationStatus(ApiValidationStatusCode.Valid);
+        }
+
+        List<String> pathParams = apiParmList.stream().filter(p->p.getParam()!=null).map(ApiParam::getParam).collect(Collectors.toList());
+
+        //Lets first parse all param in api path
+        List<String> parameterInPath = new ArrayList<>();
+        int startIndex =0;
+        int endIndex =0;
+        boolean foundOpeningBracket = false;
+        boolean foundClosingBracket = false;
+
+        for(int ind =0;ind<apiPath.length();ind++){
+            startIndex = endIndex;
+            if(apiPath.charAt(ind) == '{'){
+                foundOpeningBracket = true;
+                foundClosingBracket = false;
+                startIndex = ind;
+                do {
+                    if(apiPath.charAt(ind) == '}'){
+                        foundClosingBracket = true;
+                        endIndex = ind;
+                        parameterInPath.add(apiPath.substring(startIndex+1,endIndex));
+                        break;
+                    }
+                }while(++ind < apiPath.length());
+                endIndex =ind;
+
+                if(endIndex >= apiPath.length()){
+                    break;
+                }
+
+                if(foundOpeningBracket && !foundClosingBracket){
+                    return new ApiValidationStatus(ApiValidationStatusCode.InvalidPathParam,String.format("Invalid api path : The path has not been constructed properly and missing closing '}' bracket"));
+                }
+
+                //reset
+                foundOpeningBracket=false;
+                foundClosingBracket = false;
+
+            }
+        }
+
+        if(foundOpeningBracket && !foundClosingBracket){
+            return new ApiValidationStatus(ApiValidationStatusCode.InvalidPathParam,String.format("Invalid api path %s : The path has not been constructed properly and missing closing '}' bracket",apiPath));
+        }
+
+        if(!parameterInPath.isEmpty()){
+            if(parameterInPath.size() != pathParams.size()){
+                //Number Path param parsed and path param included in api mismatched
+                return new ApiValidationStatus(ApiValidationStatusCode.InvalidPathParam,String.format("Invalid api path %s : The path has not been constructed properly and missing closing '}' bracket",apiPath));
+
+            }
+            for(int ind =0;ind<pathParams.size();ind++){
+                if(!pathParams.get(ind).equals(parameterInPath.get(ind))){
+                    //Path param parsed and path param included in api mismatched
+                    return new ApiValidationStatus(ApiValidationStatusCode.InvalidPathParam,String.format("Path parameter in api path %s miss match with api document path list",apiPath));
+                }
+            }
+        }
+
+        return new ApiValidationStatus(ApiValidationStatusCode.Valid);
+    }
 
 	public static boolean doesResourceClassExist(String className, String resourceType, ResourceDocumentBuilder resouceDocumentBuilder){
 		Class classToVerify = null;
@@ -260,7 +336,7 @@ public final class Utility {
 	 * @param interfaceName
      * @return
      */
-    public static boolean doesResourceTypeImplementInterfaceListed(String resourceClassName,String interfaceName){
+    public static boolean hasResourceTypeImplementInterfaceListed(String resourceClassName,String interfaceName){
         boolean classImplementInterface = false;
         try {
             Class classToVerify = verifyAndReturnResourceClass(resourceClassName);
@@ -310,15 +386,22 @@ public final class Utility {
 		return classHasImplementedInterface;
 	}
 
-	public static ArrayList<String> parseAndGetToken(String dataToParase){
+	/***
+	 * This function is to parse api path and get path param enclosed in { } bracket as list
+	 * @param apiPath
+	 * @return array list of path param parsing api path
+     */
+	public static ArrayList<String> parseAndGetPathParams(String apiPath){
 		String[] params = null;
 		ArrayList<String> paramList = new ArrayList<>();
-		if (dataToParase != null){
+		if (apiPath != null){
 			//Parse path and get list of path param
-			params = dataToParase.split("\\{");
+			String pathParamOpeningBracket = "\\{";
+			String pathParamClosingBracket = "}";
+			params = apiPath.split(pathParamOpeningBracket);
 			for(String p : params){
 				if(p.contains("}")){
-					int indexOfClosingBracket = p.indexOf('}');
+					int indexOfClosingBracket = p.indexOf(pathParamClosingBracket);
 
 					paramList.add(p.substring(0,indexOfClosingBracket));
 				}
