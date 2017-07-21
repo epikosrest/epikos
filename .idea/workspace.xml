@@ -1,177 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="0b423aa9-fb8c-4e84-be43-f9122bf553b3" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Config/Application.configuration" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Config/dynamicresource.yml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Dockerfile" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/LICENSE.md" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/META-INF/MANIFEST.MF" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Procfile" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/README.md" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/build.properties" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/codecov.yml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/spoof/test_response.json" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/domain/constants/ENCODING_TYPE.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/domain/enums/ApiValidationStatusCode.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/domain/enums/Method.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/domain/enums/ServiceMode.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/domain/enums/Status.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/dynamic/resources/Api.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/dynamic/resources/ApiFactory.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/dynamic/resources/ApiParam.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/dynamic/resources/ApiResponse.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/dynamic/resources/DeleteApi.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/dynamic/resources/DynamicRequest.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/dynamic/resources/DynamicResourceContainer.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/dynamic/resources/GetApi.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/dynamic/resources/IDynamicRequest.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/dynamic/resources/IDynamicRequestDELETE.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/dynamic/resources/IDynamicRequestGET.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/dynamic/resources/IDynamicRequestPATCH.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/dynamic/resources/IDynamicRequestPOST.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/dynamic/resources/IDynamicRequestPUT.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/dynamic/resources/IDynamicResourceController.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/dynamic/resources/IDynamicResourceControllerDELETE.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/dynamic/resources/IDynamicResourceControllerGet.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/dynamic/resources/IDynamicResourceControllerPATCH.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/dynamic/resources/IDynamicResourceControllerPOST.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/dynamic/resources/IDynamicResourceControllerPUT.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/dynamic/resources/IMethod.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/dynamic/resources/PatchApi.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/dynamic/resources/PostApi.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/dynamic/resources/PutApi.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/dynamic/resources/ResourceDocumentBuilder.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/dynamic/resources/SpoofApi.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/engine/processor/DeleteRequestProcessor.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/engine/processor/GetRequestProcessor.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/engine/processor/PatchRequestProcessor.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/engine/processor/PostRequestProcessor.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/engine/processor/PutRequestProcessor.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/engine/processor/RequestProcessor.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/engine/processor/RequestProcessorFactory.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/engine/processor/SpoofRequestProcessor.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/error/ApiValidationStatus.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/error/EpikosError.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/exception/EpikosException.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/filter/PostRequestFilter.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/filter/PreRequestFilter.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/intereceptor/RequestReaderIntereceptor.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/intereceptor/ResponseWriterInterceptor.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/lib/Utility.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/lib/configuration/AppConfiguration.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/lib/configuration/Configuration.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/lib/configuration/IAppConfiguration.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/service/IServiceMetaData.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/service/ServiceMetaData.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/service/ServiceResourceConfig.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/service/handler/RequestHandler.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/core/spoof/Spoof.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/example/controller/GetTestController.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/example/dynamic_controller/DynamicHelloController.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/example/request/HelloRequest.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/example/response/HelloResponse.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/example/response/Response.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/external/swagger/EpikosApiToSwaggerApiDocGenerator.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/external/swagger/SwaggerApiTemplateLoader.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/metrics/Metrics.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/restserver/IService.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/restserver/Service.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/SwaggerApiTemplate" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/banner.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/log4j.properties" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/SwaggerApiTemplate1" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/css/print.css" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/css/reset.css" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/css/screen.css" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/css/style.css" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/css/typography.css" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/fonts/DroidSans-Bold.ttf" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/fonts/DroidSans.ttf" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/images/collapse.gif" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/images/expand.gif" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/images/explorer_icons.png" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/images/favicon-16x16.png" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/images/favicon-32x32.png" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/images/favicon.ico" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/images/logo_small.png" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/images/pet_store_api.png" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/images/throbber.gif" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/images/wordnik_api.png" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/index.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/lang/ca.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/lang/el.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/lang/en.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/lang/es.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/lang/fr.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/lang/geo.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/lang/it.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/lang/ja.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/lang/ko-kr.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/lang/pl.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/lang/pt.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/lang/ru.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/lang/tr.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/lang/translator.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/lang/zh-cn.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/lib/backbone-min.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/lib/es5-shim.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/lib/handlebars-4.0.5.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/lib/highlight.9.1.0.pack.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/lib/highlight.9.1.0.pack_extended.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/lib/jquery-1.8.0.min.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/lib/jquery.ba-bbq.min.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/lib/jquery.slideto.min.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/lib/jquery.wiggle.min.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/lib/js-yaml.min.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/lib/jsoneditor.min.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/lib/lodash.min.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/lib/marked.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/lib/object-assign-pollyfill.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/lib/sanitize-html.min.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/lib/swagger-oauth.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/o2c.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/swagger-ui.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/swagger-ui.min.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/swagger_bak/css/reset.css" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/swagger_bak/css/screen.css" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/swagger_bak/css/typography.css" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/swagger_bak/fonts/droid-sans-v6-latin-700.eot" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/swagger_bak/fonts/droid-sans-v6-latin-700.svg" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/swagger_bak/fonts/droid-sans-v6-latin-700.ttf" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/swagger_bak/fonts/droid-sans-v6-latin-700.woff" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/swagger_bak/fonts/droid-sans-v6-latin-700.woff2" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/swagger_bak/fonts/droid-sans-v6-latin-regular.eot" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/swagger_bak/fonts/droid-sans-v6-latin-regular.svg" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/swagger_bak/fonts/droid-sans-v6-latin-regular.ttf" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/swagger_bak/fonts/droid-sans-v6-latin-regular.woff" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/swagger_bak/fonts/droid-sans-v6-latin-regular.woff2" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/swagger_bak/images/explorer_icons.png" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/swagger_bak/images/logo_small.png" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/swagger_bak/images/pet_store_api.png" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/swagger_bak/images/throbber.gif" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/swagger_bak/images/wordnik_api.png" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/swagger_bak/index.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/swagger_bak/lib/backbone-min.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/swagger_bak/lib/handlebars-2.0.0.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/swagger_bak/lib/highlight.7.3.pack.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/swagger_bak/lib/jquery-1.8.0.min.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/swagger_bak/lib/jquery.ba-bbq.min.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/swagger_bak/lib/jquery.slideto.min.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/swagger_bak/lib/jquery.wiggle.min.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/swagger_bak/lib/marked.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/swagger_bak/lib/shred.bundle.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/swagger_bak/lib/shred/content.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/swagger_bak/lib/swagger-client.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/swagger_bak/lib/swagger-oauth.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/swagger_bak/lib/underscore-min.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/swagger_bak/o2c.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/swagger_bak/patch.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/swagger_bak/swagger-ui.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/resources/swagger-ui/swagger_bak/swagger-ui.min.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/test/java/core/error/EpikosErrorTest.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/test/java/core/spoof/SpoofTest.java" afterPath="" />
-    </list>
+    <list default="true" id="0b423aa9-fb8c-4e84-be43-f9122bf553b3" name="Default" comment="" />
     <ignored path="EpikosRestService.iws" />
     <ignored path=".idea/workspace.xml" />
     <ignored path="$PROJECT_DIR$/target/" />
@@ -195,8 +25,8 @@
       <file leaf-file-name="pom.xml" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/pom.xml">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.028089888">
-              <caret line="408" column="23" selection-start-line="408" selection-start-column="23" selection-end-line="408" selection-end-column="23" />
+            <state vertical-scroll-proportion="-0.028089888">
+              <caret line="28" column="23" selection-start-line="28" selection-start-column="23" selection-end-line="28" selection-end-column="23" />
               <folding />
             </state>
           </provider>
@@ -1046,8 +876,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/pom.xml">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.028089888">
-          <caret line="408" column="23" selection-start-line="408" selection-start-column="23" selection-end-line="408" selection-end-column="23" />
+        <state vertical-scroll-proportion="-0.028089888">
+          <caret line="28" column="23" selection-start-line="28" selection-start-column="23" selection-end-line="28" selection-end-column="23" />
           <folding />
         </state>
       </provider>
