@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: GenericRestService_Java
+Bundle-SymbolicName: GenericRestService_Java
+Bundle-Version: 1.0.0.qualifier
+Export-Package: com.mycompany.information.v1,
+ core.lib.configuration,
+ restresources,
+ restserver

@@ -1,0 +1,89 @@
+#Dynamic Resource Configuration. The following hierarchy represents list of dynamic resources that represents rest resources
+#E.g the resources can be define as follow
+apiList:
+  - consume: application/json
+    produce: application/json
+    path: api/info
+    method: GET
+    # responseSoof correspond to spoof response for the api. It must be a file e.g. .json
+    responseSpoof: spoof/test_response.json
+    status: OK
+  - consume: application/json
+    produce: application/json
+    path: test/{testid}/hello/{helloid}/info
+    method: GET
+    status: OK
+    response: example.response.Response
+    responseSpoof: spoof/test_response.json
+    controller: example.dynamic_controller.DynamicHelloController
+    #Use apiParamList to provide description of each param path and its corresponding swagger documentation
+    #e.g. in this example param testid description has been provided as "test id" so that it can display in swagger
+    apiParamList:
+      - {param: testid, value: test id}
+      - {param: helloid, value: hello id}
+    responseList:
+          - {status: 404, message: not found, response: example.response.Response.class}
+          - {status: 400, message: bad request, response: example.response.Response.class}
+  - consume: application/json
+    produce: application/json
+    path: swagger
+    method: GET
+    status: OK
+    response: example.response.Response
+    controller: example.dynamic_controller.DynamicHelloController
+  - consume: application/json
+    produce: application/json
+    path: swagger/doc2
+    method: GET
+    status: OK
+    response: example.response.Response
+    response: spoof/test_response.json
+    controller: example.dynamic_controller.DynamicHelloController
+    responseList:
+      - {status: 404, message: not found, response: example.response.Response.class}
+      - {status: 400, message: bad request, response: example.response.Response.class}
+#  - consume: application/json
+#    produce: application/json
+#    path: test/hello
+#    method: GET
+#    response: spoof/test_response.json
+#   - consume: application/json
+#     produce: application/json
+#     path: hello
+#     method: GET
+#     response: restresources.HelloResponse
+#     controller: controller.example.HelloController
+  - consume: application/json
+    produce: application/json
+    path: hello
+    method: POST
+    status: 201
+    request: restresources.HelloRequest
+    response: restresources.HelloResponse
+    controller: example.dynamic_controller.DynamicHelloController
+#    apiParamList:
+#          - {paramid: helloid, value: test hello id}
+#    responseList:
+#          - {status: 404, message: not found, response: example.response.Response.class}
+#          - {status: 400, message: bad request, response: example.response.Response.class}
+#   - consume: application/json
+#     produce: application/xml
+#     path: info/{infoid}/test
+#     method: GET
+#     request: restresources.Information
+#     response: restresources.InformationResponse
+#     controller: controller.example.InformationController
+#   - consume: application/json
+#     produce: application/json
+#     path: info/{infoid}/test
+#     method: POST
+#     request: restresources.Information
+#     response: restresources.InformationResponse
+#     controller: controller.example.InformationController
+#   - consume: application/json
+#     produce: application/json
+#     path: info/{infoid}/tests
+#     method: POST
+#     response: spoof/test_response.json
+
+

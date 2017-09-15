@@ -1,0 +1,46 @@
+package external.swagger.template; import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiResponse;
+import com.wordnik.swagger.annotations.ApiResponses;
+import core.error.EpikosError;
+import example.response.Response;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.POST;
+
+import javax.ws.rs.PUT;
+
+import javax.ws.rs.DELETE;
+
+import javax.ws.rs.GET;
+@Api(value = "Api Doc", description = "Swagger documentation for API(s)")
+public class SwaggerApiDocumentation{
+
+@Path("test/api")
+@Produces("application/json")
+@ApiOperation(value = "First API test 0",notes = "First Note0",response = Response.class)
+public void process0() {
+}
+
+
+@Path("test/hello")
+@Produces("application/json")
+@ApiOperation(value = "First API test 1",notes = "First Note1",response = Response.class)
+public void process1() {
+}
+
+
+@Path("swagger/doc1")
+@Produces("application/json")
+@ApiOperation(value = "First API test 2",notes = "First Note2",response = Response.class)
+public void process2() {
+}
+
+
+@Path("swagger/doc2")
+@Produces("application/json")
+@ApiOperation(value = "First API test 3",notes = "First Note3",response = Response.class)
+public void process3() {
+}
+}

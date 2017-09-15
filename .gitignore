@@ -1,0 +1,15 @@
+*/.project
+*/.classpath
+*/.settings
+*/.idea
+*/*.iml
+*/*.log
+*/*.log.*
+*/logs/*
+*/src/main/resources/spring-context.out.xml
+target
+generated
+*.idea
+.idea/*L
+.idea/libraries/*
+EpikosRestService.iml
