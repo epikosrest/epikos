@@ -1,0 +1,11 @@
+#Name of service
+service.name=EpikosRestService
+
+#Port number to use
+port=8080
+
+#Multiple resources can be included using ; delimeter. This value indicates where to look for rest resources
+resource.package.name=example.controller;
+
+#indicates list of dynamic resource file(s) which will get load and populate api list. The file extension can be either json or yml
+dynamic.resource.configuration=dynamicresource.json,dynamicresource.yml

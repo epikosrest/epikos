@@ -1,5 +1,5 @@
 <!--
-Copyright (c) [2016] [epikosrest@gmail.com]
+Copyright (c) [2017] [epikosrest@gmail.com]
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +25,7 @@ SOFTWARE.>
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.nepaliapps</groupId>
 	<artifactId>EpikosRestService</artifactId>
-	<version>0.0.7.5.1</version>
+	<version>0.0.7.8</version>
 	<name>Epikos</name>
     <description>Epikos is a Rest Serivce framework which can be extend to develop any other Rest API/Services. For more
     detail please checkout github (https://github.com/epikosrest/epikos.git)</description>
@@ -125,7 +125,52 @@ SOFTWARE.>
             <version>3.6.4</version>
         </dependency>
 
-    </dependencies>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-server</artifactId>
+			<version>9.2.3.v20140905</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.glassfish.jersey.containers</groupId>
+			<artifactId>jersey-container-jetty-http</artifactId>
+			<version>2.7</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-servlet</artifactId>
+			<version>9.2.3.v20140905</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.glassfish.jersey.core</groupId>
+			<artifactId>jersey-server</artifactId>
+			<version>2.7</version>
+		</dependency>
+
+<!-- for tomcat support -->
+		<!--dependency>
+			<groupId>org.glassfish.jersey.containers</groupId>
+			<artifactId>jersey-container-servlet-core</artifactId>
+			<version>2.7</version>
+		</dependency-->
+
+		<!-- https://mvnrepository.com/artifact/org.apache.tomcat.embed/tomcat-embed-core -->
+		<!--dependency>
+			<groupId>org.apache.tomcat.embed</groupId>
+			<artifactId>tomcat-embed-core</artifactId>
+			<version>8.5.20</version>
+		</dependency-->
+
+		<!-- https://mvnrepository.com/artifact/org.glassfish.jersey.core/jersey-common -->
+		<!--dependency>
+			<groupId>org.glassfish.jersey.core</groupId>
+			<artifactId>jersey-common</artifactId>
+			<version>2.25.1</version>
+		</dependency-->
+
+	</dependencies>
 
 
 	<build>
@@ -243,7 +288,7 @@ SOFTWARE.>
 					<archive>
 						<manifest>
 							<addClasspath>true</addClasspath>
-							<mainClass>restserver.Service</mainClass>
+							<mainClass>service.Service</mainClass>
 						</manifest>
 					</archive>
 
@@ -279,7 +324,7 @@ SOFTWARE.>
 						<manifest>
 							<addClasspath>true</addClasspath>
 							<classpathPrefix>${project.build.finalName}.lib/</classpathPrefix>
-							<mainClass>restserver.Service</mainClass>
+							<mainClass>service.Service</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
@@ -323,7 +368,7 @@ SOFTWARE.>
 							<assembleDirectory>target</assembleDirectory>
 							<programs>
 								<program>
-									<mainClass>restserver.Service</mainClass>
+									<mainClass>service.Service</mainClass>
 									<name>Service</name>
 								</program>
 							</programs>
@@ -344,7 +389,7 @@ SOFTWARE.>
 					</execution>
 				</executions>
 				<configuration>
-					<mainClass>restserver.Service</mainClass>
+					<mainClass>service.Service</mainClass>
                     <classpathScope combine.children="override"></classpathScope>
 				</configuration>
 			</plugin>
